@@ -49,7 +49,7 @@ public class ValidationResult
     /// <returns>A failed validation result.</returns>
     public static ValidationResult Failure(params ValidationError[] errors)
     {
-        return new ValidationResult { IsValid = false, Errors = errors };
+        return new ValidationResult { IsValid = false, Errors = errors ?? [] };
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class ValidationResult
     /// <returns>A failed validation result.</returns>
     public static ValidationResult Failure(params string[] errorMessages)
     {
-        return new ValidationResult { IsValid = false, Errors = errorMessages.Select(msg => new ValidationError(msg)) };
+        return new ValidationResult { IsValid = false, Errors = (errorMessages ?? []).Select(msg => new ValidationError(msg)) };
     }
 }
 
@@ -97,7 +97,7 @@ public class ValidationException : Exception
     public ValidationException(IEnumerable<ValidationError> errors)
         : base("One or more validation errors occurred.")
     {
-        Errors = errors;
+        Errors = errors ?? [];
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ public class ValidationException : Exception
     public ValidationException(string message, IEnumerable<ValidationError> errors)
         : base(message)
     {
-        Errors = errors;
+        Errors = errors ?? [];
     }
 
     /// <summary>
