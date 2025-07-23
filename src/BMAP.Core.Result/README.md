@@ -890,3 +890,267 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Happy coding with Results!** ??
 
 For questions, issues, or contributions, please visit our [GitHub repository](https://github.com/your-org/BMAP.Core.Result) or reach out to the BMAP Development Team.
+
+## ??? Fluent Builder Pattern
+
+The library includes comprehensive fluent builder implementations for both Error and Result objects, providing an intuitive and composable way to construct complex objects with validation and method chaining.
+
+### ErrorBuilder
+
+The `ErrorBuilder` provides a fluent interface for creating Error instances with step-by-step configuration:
+
+```csharp
+using BMAP.Core.Result.Builders;
+
+// Basic error building
+var error = ErrorBuilder
+    .WithCode("USER_NOT_FOUND")
+    .SetMessage("User with the specified ID was not found")
+    .AsNotFound()
+    .WithMetadata("UserId", 123)
+    .WithMetadata("Timestamp", DateTime.UtcNow)
+    .Build();
+
+// Starting from existing error
+var modifiedError = ErrorBuilder
+    .FromError(existingError)
+    .AsValidation()
+    .WithMetadata("AdditionalInfo", "Modified from existing")
+    .Build();
+
+// Conditional building
+var conditionalError = ErrorBuilder
+    .WithCode("CONDITIONAL_ERROR")
+    .SetMessage("Error with conditional metadata")
+    .If(includeDebugInfo, builder => builder.WithMetadata("DebugInfo", debugData))
+    .WithMetadataIf(isProduction, "Environment", "Production")
+    .AsInternal()
+    .Build();
+```
+
+#### ErrorBuilder Features
+
+- **Factory Methods**: `Create()`, `WithCode()`, `WithMessage()`, `FromError()`
+- **Property Setting**: `SetCode()`, `SetMessage()`
+- **Error Types**: `AsValidation()`, `AsNotFound()`, `AsConflict()`, `AsUnauthorized()`, etc.
+- **Metadata Management**: `WithMetadata()`, `RemoveMetadata()`, `ClearMetadata()`
+- **Conditional Operations**: `If()`, `WithMetadataIf()`
+- **Validation**: `CanBuild()`, `Validate()`
+- **Implicit Conversion**: Direct conversion to `Error`
+
+### ResultBuilder
+
+The `ResultBuilder` provides fluent interfaces for creating both `Result` and `Result<T>` instances:
+
+#### Non-Generic ResultBuilder
+
+```csharp
+using BMAP.Core.Result.Builders;
+
+// Success result
+var successResult = ResultBuilder
+    .Success()
+    .Build();
+
+// Failure result with detailed error
+var failureResult = ResultBuilder
+    .Failure()
+    .WithError("OPERATION_FAILED", "The operation could not be completed")
+    .AsValidation()
+    .WithErrorMetadata("OperationId", operationId)
+    .WithErrorMetadata("Timestamp", DateTime.UtcNow)
+    .Build();
+
+// Conditional result building
+var conditionalResult = ResultBuilder
+    .Create(isValid)
+    .If(!isValid, builder => builder
+        .WithError("VALIDATION_FAILED", "Validation failed")
+        .AsValidation()
+        .WithErrorMetadata("ValidationErrors", errors))
+    .Build();
+```
+
+#### Generic ResultBuilder&lt;T&gt;
+
+```csharp
+// Success result with value
+var userResult = ResultBuilder<User>
+    .Success(user)
+    .Build();
+
+// Failure result
+var failedUserResult = ResultBuilder<User>
+    .Failure("USER_NOT_FOUND", "User with specified ID was not found")
+    .AsNotFound()
+    .WithErrorMetadata("UserId", userId)
+    .WithErrorMetadata("SearchTimestamp", DateTime.UtcNow)
+    .Build();
+
+// Complex conditional building
+var complexResult = ResultBuilder<ProcessedData>
+    .Create(dataIsValid, processedData)
+    .If(!dataIsValid, builder => builder
+        .WithError("DATA_INVALID", "Input data failed validation")
+        .AsValidation()
+        .WithErrorMetadata("ValidationRule", failedRule)
+        .WithErrorMetadata("InputSize", inputData.Length))
+    .Build();
+
+// Converting between success and failure
+var dynamicResult = ResultBuilder<string>
+    .Success("initial value")
+    .If(shouldFail, builder => builder
+        .WithError("DYNAMIC_FAILURE", "Converted to failure")
+        .AsInternal())
+    .Build();
+```
+
+#### ResultBuilder Features
+
+- **Factory Methods**: `Success()`, `Failure()`, `Create()`, `FromResult()`
+- **Value Management**: `WithValue()` (generic version only)
+- **Error Management**: `WithError()`, error type methods, metadata methods
+- **Conditional Operations**: `If()` with builder configuration
+- **Validation**: `CanBuild()`, `Validate()`
+- **Implicit Conversion**: Direct conversion to `Result` or `Result<T>`
+
+### Advanced Builder Patterns
+
+#### Fluent Error Construction for APIs
+
+```csharp
+public static class ApiErrors
+{
+    public static Error InvalidRequest(string field, object value) =>
+        ErrorBuilder
+            .WithCode("API_INVALID_REQUEST")
+            .SetMessage($"Invalid value for field '{field}'")
+            .AsValidation()
+            .WithMetadata("Field", field)
+            .WithMetadata("ProvidedValue", value)
+            .WithMetadata("Timestamp", DateTime.UtcNow)
+            .Build();
+
+    public static Error Unauthorized(string reason) =>
+        ErrorBuilder
+            .WithCode("API_UNAUTHORIZED")
+            .SetMessage("Authentication required")
+            .AsUnauthorized()
+            .WithMetadata("Reason", reason)
+            .WithMetadata("Endpoint", GetCurrentEndpoint())
+            .Build();
+}
+```
+
+#### Complex Result Building for Business Logic
+
+```csharp
+public async Task<Result<OrderConfirmation>> ProcessOrderAsync(OrderRequest request)
+{
+    return await Task.FromResult(ResultBuilder<OrderConfirmation>
+        .Create(request.IsValid(), orderConfirmation)
+        .If(!request.IsValid(), builder => builder
+            .WithError("ORDER_INVALID", "Order validation failed")
+            .AsValidation()
+            .WithErrorMetadata("ValidationErrors", GetValidationErrors(request)))
+        .If(request.IsValid() && !IsInventoryAvailable(request), builder => builder
+            .WithError("INVENTORY_INSUFFICIENT", "Insufficient inventory")
+            .AsConflict()
+            .WithErrorMetadata("RequestedItems", request.Items)
+            .WithErrorMetadata("AvailableQuantity", GetAvailableQuantity(request)))
+        .If(request.IsValid() && IsInventoryAvailable(request) && !IsPaymentValid(request), builder => builder
+            .WithError("PAYMENT_FAILED", "Payment processing failed")
+            .AsExternal()
+            .WithErrorMetadata("PaymentMethod", request.PaymentMethod)
+            .WithErrorMetadata("Amount", request.Amount))
+        .Build());
+}
+```
+
+#### Builder Composition and Reusability
+
+```csharp
+public static class ErrorBuilderExtensions
+{
+    public static ErrorBuilder WithUserContext(this ErrorBuilder builder, int userId, string action)
+    {
+        return builder
+            .WithMetadata("UserId", userId)
+            .WithMetadata("Action", action)
+            .WithMetadata("Timestamp", DateTime.UtcNow);
+    }
+
+    public static ErrorBuilder WithRequestContext(this ErrorBuilder builder, HttpContext context)
+    {
+        return builder
+            .WithMetadata("RequestId", context.TraceIdentifier)
+            .WithMetadata("UserAgent", context.Request.Headers.UserAgent.ToString())
+            .WithMetadata("IPAddress", context.Connection.RemoteIpAddress?.ToString());
+    }
+}
+
+// Usage
+var contextualError = ErrorBuilder
+    .WithCode("OPERATION_FAILED")
+    .SetMessage("User operation failed")
+    .AsInternal()
+    .WithUserContext(userId, "UpdateProfile")
+    .WithRequestContext(httpContext)
+    .Build();
+```
+
+### Builder Validation and Error Handling
+
+The builders include comprehensive validation to ensure objects are properly constructed:
+
+```csharp
+// Validation before building
+var builder = ErrorBuilder.Create();
+if (builder.CanBuild())
+{
+    var error = builder.Build();
+}
+else
+{
+    // Handle incomplete builder state
+}
+
+// Explicit validation
+try
+{
+    var error = ErrorBuilder
+        .Create()
+        .Validate() // Throws InvalidOperationException if invalid
+        .Build();
+}
+catch (InvalidOperationException ex)
+{
+    // Handle validation failure
+}
+
+// Safe building with validation
+var result = ResultBuilder<string>
+    .Failure()
+    .If(hasError, builder => builder.WithError("CODE", "Message"))
+    .Build(); // Only builds if valid, throws otherwise
+```
+
+### Performance Considerations
+
+The builders are designed for optimal performance:
+
+- **Minimal Allocations**: Efficient memory usage with lazy evaluation
+- **Immutable Results**: Thread-safe error and result objects
+- **Builder Reuse**: Builders can be configured and reused multiple times
+- **Validation Caching**: Built-in validation state tracking
+
+```csharp
+// Efficient builder reuse
+var baseErrorBuilder = ErrorBuilder
+    .WithCode("BASE_ERROR")
+    .SetMessage("Base error message")
+    .AsValidation();
+
+var error1 = baseErrorBuilder.WithMetadata("Context", "Context1").Build();
+var error2 = baseErrorBuilder.WithMetadata("Context", "Context2").Build();
