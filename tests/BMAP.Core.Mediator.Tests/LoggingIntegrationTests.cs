@@ -41,7 +41,7 @@ public class LoggingIntegrationTests
         var logMessages = logOutput.ToString();
         Assert.Contains("Sending request of type TestLogRequest", logMessages);
         Assert.Contains("Found handler of type TestLogRequestHandler", logMessages);
-        Assert.Contains("Successfully completed request of type TestLogRequest", logMessages);
+        Assert.Contains("Successfully executed request TestLogRequest", logMessages);
     }
     
     [Fact]
@@ -72,7 +72,7 @@ public class LoggingIntegrationTests
         Assert.Equal("Response: Test logging with response", result);
         var logMessages = logOutput.ToString();
         Assert.Contains("Sending request of type TestLogRequestWithResponse expecting response of type String", logMessages);
-        Assert.Contains("Successfully completed request of type TestLogRequestWithResponse with response", logMessages);
+        Assert.Contains("Successfully executed request TestLogRequestWithResponse with response", logMessages);
     }
     
     [Fact]
@@ -101,9 +101,9 @@ public class LoggingIntegrationTests
         
         // Assert
         var logMessages = logOutput.ToString();
-        Assert.Contains("Publishing and waiting for notification of type TestLogNotification", logMessages);
-        Assert.Contains("Found 1 handlers for notification type TestLogNotification", logMessages);
-        Assert.Contains("All notification handlers completed successfully", logMessages);
+        Assert.Contains("Publishing and waiting for event/notification of type TestLogNotification", logMessages);
+        Assert.Contains("Found 1 event handlers for notification type TestLogNotification", logMessages);
+        Assert.Contains("All event handlers completed successfully", logMessages);
     }
 
     [Fact]
@@ -132,8 +132,8 @@ public class LoggingIntegrationTests
         
         // Assert
         var logMessages = logOutput.ToString();
-        Assert.Contains("Publishing and waiting for notification of type TestLogNotification", logMessages);
-        Assert.Contains("No handlers found for notification type TestLogNotification", logMessages);
+        Assert.Contains("Publishing and waiting for event/notification of type TestLogNotification", logMessages);
+        Assert.Contains("No event handlers found for notification type TestLogNotification", logMessages);
     }
 
     [Fact]
@@ -163,9 +163,9 @@ public class LoggingIntegrationTests
         
         // Assert
         var logMessages = logOutput.ToString();
-        Assert.Contains("Publishing and waiting for notification of type TestLogNotification", logMessages);
-        Assert.Contains("Found 2 handlers for notification type TestLogNotification", logMessages);
-        Assert.Contains("All notification handlers completed successfully", logMessages);
+        Assert.Contains("Publishing and waiting for event/notification of type TestLogNotification", logMessages);
+        Assert.Contains("Found 2 event handlers for notification type TestLogNotification", logMessages);
+        Assert.Contains("All event handlers completed successfully", logMessages);
     }
 
     [Fact]
