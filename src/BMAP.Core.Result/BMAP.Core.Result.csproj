@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>13.0</LangVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>BMAP.Core.Result</PackageId>
+		<PackageVersion>1.0.0</PackageVersion>
+		<Authors>BMAP Development Team</Authors>
+		<Description>A comprehensive Result pattern implementation for .NET 9 applications, providing a robust way to handle operation outcomes, error management, and functional programming patterns.</Description>
+		<PackageTags>result;pattern;functional;error-handling;csharp;dotnet9</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>
