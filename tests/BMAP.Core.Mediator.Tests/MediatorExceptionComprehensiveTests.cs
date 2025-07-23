@@ -124,7 +124,7 @@ public class MediatorExceptionTests
         // Verify property is readonly (no setter accessible)
         var property = typeof(HandlerNotFoundException).GetProperty(nameof(HandlerNotFoundException.RequestType));
         Assert.NotNull(property);
-        Assert.Null(property!.SetMethod);
+        Assert.Null(property.SetMethod);
     }
 
     #endregion
@@ -215,8 +215,8 @@ public class MediatorExceptionTests
         
         Assert.NotNull(requestTypeProperty);
         Assert.NotNull(handlerCountProperty);
-        Assert.Null(requestTypeProperty!.SetMethod);
-        Assert.Null(handlerCountProperty!.SetMethod);
+        Assert.Null(requestTypeProperty.SetMethod);
+        Assert.Null(handlerCountProperty.SetMethod);
     }
 
     [Fact]
@@ -338,14 +338,9 @@ public class MediatorExceptionTests
     #region Test Helper Classes
 
     // Test request types for exception testing
-    public class TestRequest : IRequest
-    {
-    }
+    public class TestRequest : IRequest;
 
-    public class TestGenericRequest<T> : IRequest<T>
-    {
-        public T? Value { get; set; }
-    }
+    public class TestGenericRequest<T> : IRequest<T>;
 
     #endregion
 }

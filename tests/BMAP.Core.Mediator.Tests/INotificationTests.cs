@@ -73,18 +73,12 @@ public class NotificationTests
     }
 
     // Test classes
-    private class TestNotification : INotification
-    {
-        public string Message { get; set; } = "Test notification";
-    }
+    private class TestNotification : INotification;
 
     private class TestNotificationHandler : INotificationHandler<TestNotification>
     {
-        public bool WasCalled { get; private set; }
-
         public Task HandleAsync(TestNotification notification, CancellationToken cancellationToken = default)
         {
-            WasCalled = true;
             return Task.CompletedTask;
         }
     }

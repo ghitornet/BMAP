@@ -140,11 +140,8 @@ public class MediatorExceptionsTests
         // Arrange
         var exception = new MediatorException("Test");
 
-        // Act
-        var isException = exception is Exception;
-
-        // Assert
-        Assert.True(isException);
+        // Assert - Verify inheritance hierarchy
+        Assert.IsAssignableFrom<Exception>(exception);
     }
 
     [Fact]
@@ -153,13 +150,9 @@ public class MediatorExceptionsTests
         // Arrange
         var exception = new HandlerNotFoundException(typeof(string));
 
-        // Act
-        var isException = exception is Exception;
-        var isMediatorException = exception is MediatorException;
-
-        // Assert
-        Assert.True(isException);
-        Assert.True(isMediatorException);
+        // Assert - Verify inheritance hierarchy
+        Assert.IsAssignableFrom<Exception>(exception);
+        Assert.IsAssignableFrom<MediatorException>(exception);
     }
 
     [Fact]
@@ -168,12 +161,8 @@ public class MediatorExceptionsTests
         // Arrange
         var exception = new MultipleHandlersFoundException(typeof(string), 2);
 
-        // Act
-        var isException = exception is Exception;
-        var isMediatorException = exception is MediatorException;
-
-        // Assert
-        Assert.True(isException);
-        Assert.True(isMediatorException);
+        // Assert - Verify inheritance hierarchy
+        Assert.IsAssignableFrom<Exception>(exception);
+        Assert.IsAssignableFrom<MediatorException>(exception);
     }
 }

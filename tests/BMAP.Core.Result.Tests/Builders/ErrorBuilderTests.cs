@@ -411,8 +411,8 @@ public class ErrorBuilderTests
     private class TestDictionaryWithNullKey : IDictionary<string, object>
     {
         public object this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ICollection<string> Keys => new string?[] { null };
-        public ICollection<object> Values => new object[] { "value" };
+        public ICollection<string> Keys => [string.Empty];
+        public ICollection<object> Values => ["value"];
         public int Count => 1;
         public bool IsReadOnly => false;
         
@@ -440,8 +440,8 @@ public class ErrorBuilderTests
     private class TestDictionaryWithNullValue : IDictionary<string, object>
     {
         public object this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ICollection<string> Keys => new string[] { "key" };
-        public ICollection<object> Values => new object?[] { null! };
+        public ICollection<string> Keys => ["key"];
+        public ICollection<object> Values => [null!];
         public int Count => 1;
         public bool IsReadOnly => false;
         

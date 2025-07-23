@@ -21,17 +21,18 @@ public class CommandValidationBehaviorTests
         var command = new TestCommand { Name = "Test" };
         var nextCalled = false;
 
-        Task Next()
-        {
-            nextCalled = true;
-            return Task.CompletedTask;
-        }
-
         // Act
         await behavior.HandleAsync(command, Next);
 
         // Assert
         Assert.True(nextCalled);
+        return;
+
+        Task Next()
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -45,18 +46,19 @@ public class CommandValidationBehaviorTests
         var command = new TestCommand { Name = "Valid Name" };
         var nextCalled = false;
 
-        Task Next()
-        {
-            nextCalled = true;
-            return Task.CompletedTask;
-        }
-
         // Act
         await behavior.HandleAsync(command, Next);
 
         // Assert
         Assert.True(nextCalled);
         Assert.True(validator.WasCalled);
+        return;
+
+        Task Next()
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -71,18 +73,19 @@ public class CommandValidationBehaviorTests
         var command = new TestCommand { Name = "" };
         var nextCalled = false;
 
-        Task Next()
-        {
-            nextCalled = true;
-            return Task.CompletedTask;
-        }
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(command, Next));
         Assert.False(nextCalled);
         Assert.True(validator.WasCalled);
         Assert.Single(exception.Errors);
         Assert.Equal("Name is required", exception.Errors.First().Message);
+        return;
+
+        Task Next()
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -97,12 +100,6 @@ public class CommandValidationBehaviorTests
         var command = new TestCommand { Name = "Valid" };
         var nextCalled = false;
 
-        Task Next()
-        {
-            nextCalled = true;
-            return Task.CompletedTask;
-        }
-
         // Act
         await behavior.HandleAsync(command, Next);
 
@@ -110,6 +107,13 @@ public class CommandValidationBehaviorTests
         Assert.True(nextCalled);
         Assert.True(validator1.WasCalled);
         Assert.True(validator2.WasCalled);
+        return;
+
+        Task Next()
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -125,13 +129,14 @@ public class CommandValidationBehaviorTests
         var behavior = new CommandValidationBehavior<TestCommand>(validators, logger);
         var command = new TestCommand { Name = "" };
 
-        Task Next() => Task.CompletedTask;
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(command, Next));
         Assert.Equal(2, exception.Errors.Count());
         Assert.Contains(exception.Errors, e => e.Message == "Name is required");
         Assert.Contains(exception.Errors, e => e.Message == "Description is required");
+        return;
+
+        static Task Next() => Task.CompletedTask;
     }
 
     [Fact]
@@ -144,13 +149,14 @@ public class CommandValidationBehaviorTests
         var behavior = new CommandValidationBehavior<TestCommand>(validators, logger);
         var command = new TestCommand { Name = "Test" };
 
-        Task Next() => Task.CompletedTask;
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(command, Next));
         Assert.Contains("Error occurred during validation", exception.Message);
         Assert.Single(exception.Errors);
         Assert.Equal("Test validation exception", exception.Errors.First().Message);
+        return;
+
+        static Task Next() => Task.CompletedTask;
     }
 
     [Fact]
@@ -177,18 +183,19 @@ public class CommandValidationBehaviorTests
         var command = new TestCommandWithResponse { Name = "Test" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
         // Assert
         Assert.True(nextCalled);
         Assert.Equal("Success", result);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -202,12 +209,6 @@ public class CommandValidationBehaviorTests
         var command = new TestCommandWithResponse { Name = "Valid Name" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
@@ -215,6 +216,13 @@ public class CommandValidationBehaviorTests
         Assert.True(nextCalled);
         Assert.Equal("Success", result);
         Assert.True(validator.WasCalled);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -229,18 +237,19 @@ public class CommandValidationBehaviorTests
         var command = new TestCommandWithResponse { Name = "" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(command, Next));
         Assert.False(nextCalled);
         Assert.True(validator.WasCalled);
         Assert.Single(exception.Errors);
         Assert.Equal("Name is required", exception.Errors.First().Message);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -255,12 +264,6 @@ public class CommandValidationBehaviorTests
         var command = new TestCommandWithResponse { Name = "Valid" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
@@ -269,6 +272,13 @@ public class CommandValidationBehaviorTests
         Assert.Equal("Success", result);
         Assert.True(validator1.WasCalled);
         Assert.True(validator2.WasCalled);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -284,13 +294,14 @@ public class CommandValidationBehaviorTests
         var behavior = new CommandValidationBehavior<TestCommandWithResponse, string>(validators, logger);
         var command = new TestCommandWithResponse { Name = "" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(command, Next));
         Assert.Equal(2, exception.Errors.Count());
         Assert.Contains(exception.Errors, e => e.Message == "Name is required");
         Assert.Contains(exception.Errors, e => e.Message == "Description is required");
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     [Fact]
@@ -303,13 +314,14 @@ public class CommandValidationBehaviorTests
         var behavior = new CommandValidationBehavior<TestCommandWithResponse, string>(validators, logger);
         var command = new TestCommandWithResponse { Name = "Test" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(command, Next));
         Assert.Contains("Error occurred during validation", exception.Message);
         Assert.Single(exception.Errors);
         Assert.Equal("Test validation exception", exception.Errors.First().Message);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     [Fact]
@@ -333,13 +345,14 @@ public class CommandValidationBehaviorTests
         var command = new TestCommand { Name = "Test" };
         var cts = new CancellationTokenSource();
 
-        Task Next() => Task.CompletedTask;
-
         // Act
         await behavior.HandleAsync(command, Next, cts.Token);
 
         // Assert
         Assert.Equal(cts.Token, validator.ReceivedCancellationToken);
+        return;
+
+        static Task Next() => Task.CompletedTask;
     }
 
     [Fact]
@@ -353,13 +366,14 @@ public class CommandValidationBehaviorTests
         var command = new TestCommandWithResponse { Name = "Test" };
         var cts = new CancellationTokenSource();
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act
         await behavior.HandleAsync(command, Next, cts.Token);
 
         // Assert
         Assert.Equal(cts.Token, validator.ReceivedCancellationToken);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     #endregion
@@ -370,49 +384,33 @@ public class CommandValidationBehaviorTests
     public class TestCommand : ICommand
     {
         public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
     }
 
     public class TestCommandWithResponse : ICommand<string>
     {
         public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
     }
 
     // Test validators for command without response
-    public class TestCommandValidator : IValidator<TestCommand>
+    public class TestCommandValidator(ValidationResult result) : IValidator<TestCommand>
     {
-        private readonly ValidationResult _result;
-
-        public TestCommandValidator(ValidationResult result)
-        {
-            _result = result;
-        }
-
         public bool WasCalled { get; private set; }
 
         public Task<ValidationResult> ValidateAsync(TestCommand request, CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            return Task.FromResult(_result);
+            return Task.FromResult(result);
         }
     }
 
-    public class TestCommandValidator2 : IValidator<TestCommand>
+    public class TestCommandValidator2(ValidationResult result) : IValidator<TestCommand>
     {
-        private readonly ValidationResult _result;
-
-        public TestCommandValidator2(ValidationResult result)
-        {
-            _result = result;
-        }
-
         public bool WasCalled { get; private set; }
 
         public Task<ValidationResult> ValidateAsync(TestCommand request, CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            return Task.FromResult(_result);
+            return Task.FromResult(result);
         }
     }
 
@@ -436,39 +434,25 @@ public class CommandValidationBehaviorTests
     }
 
     // Test validators for command with response
-    public class TestCommandWithResponseValidator : IValidator<TestCommandWithResponse>
+    public class TestCommandWithResponseValidator(ValidationResult result) : IValidator<TestCommandWithResponse>
     {
-        private readonly ValidationResult _result;
-
-        public TestCommandWithResponseValidator(ValidationResult result)
-        {
-            _result = result;
-        }
-
         public bool WasCalled { get; private set; }
 
         public Task<ValidationResult> ValidateAsync(TestCommandWithResponse request, CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            return Task.FromResult(_result);
+            return Task.FromResult(result);
         }
     }
 
-    public class TestCommandWithResponseValidator2 : IValidator<TestCommandWithResponse>
+    public class TestCommandWithResponseValidator2(ValidationResult result) : IValidator<TestCommandWithResponse>
     {
-        private readonly ValidationResult _result;
-
-        public TestCommandWithResponseValidator2(ValidationResult result)
-        {
-            _result = result;
-        }
-
         public bool WasCalled { get; private set; }
 
         public Task<ValidationResult> ValidateAsync(TestCommandWithResponse request, CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            return Task.FromResult(_result);
+            return Task.FromResult(result);
         }
     }
 

@@ -150,9 +150,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     // Test classes for registration
-    public class TestRequest : IRequest
-    {
-    }
+    public class TestRequest : IRequest;
 
     public class TestRequestHandler : IRequestHandler<TestRequest>
     {
@@ -175,9 +173,7 @@ public class ServiceCollectionExtensionsTests
         }
     }
 
-    public class TestNotification : INotification
-    {
-    }
+    public class TestNotification : INotification;
 
     public class TestNotificationHandler : INotificationHandler<TestNotification>
     {

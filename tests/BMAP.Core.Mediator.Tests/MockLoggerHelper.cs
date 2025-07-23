@@ -35,14 +35,9 @@ public static class MockLoggerHelper
 /// Test logger implementation that writes to a StringBuilder.
 /// </summary>
 /// <typeparam name="T">The category type for the logger.</typeparam>
-public class TestLogger<T> : ILogger<T>
+public class TestLogger<T>(StringBuilder output) : ILogger<T>
 {
-    private readonly StringBuilder _output;
-
-    public TestLogger(StringBuilder output)
-    {
-        _output = output ?? throw new ArgumentNullException(nameof(output));
-    }
+    private readonly StringBuilder _output = output ?? throw new ArgumentNullException(nameof(output));
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull
     {

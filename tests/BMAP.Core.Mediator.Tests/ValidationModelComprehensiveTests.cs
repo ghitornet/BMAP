@@ -86,9 +86,6 @@ public class ValidationModelComprehensiveTests
     public void ValidationError_Properties_Should_BeReadOnly()
     {
         // Arrange
-        const string message = "Test error";
-        const string propertyName = "TestProperty";
-        var error = new ValidationError(message, propertyName);
 
         // Assert
         var messageProperty = typeof(ValidationError).GetProperty(nameof(ValidationError.Message));
@@ -96,8 +93,8 @@ public class ValidationModelComprehensiveTests
         
         Assert.NotNull(messageProperty);
         Assert.NotNull(propertyNameProperty);
-        Assert.Null(messageProperty!.SetMethod);
-        Assert.Null(propertyNameProperty!.SetMethod);
+        Assert.Null(messageProperty.SetMethod);
+        Assert.Null(propertyNameProperty.SetMethod);
     }
 
     [Fact]
@@ -220,8 +217,8 @@ public class ValidationModelComprehensiveTests
         // Assert
         Assert.False(result.IsValid);
         Assert.Equal(2, result.Errors.Count());
-        Assert.Contains(result.Errors, e => e.Message == message1 && e.PropertyName == null);
-        Assert.Contains(result.Errors, e => e.Message == message2 && e.PropertyName == null);
+        Assert.Contains(result.Errors, e => e is { Message: message1, PropertyName: null });
+        Assert.Contains(result.Errors, e => e is { Message: message2, PropertyName: null });
     }
 
     [Fact]
@@ -262,7 +259,6 @@ public class ValidationModelComprehensiveTests
     public void ValidationResult_Properties_Should_BeReadOnly()
     {
         // Arrange
-        var result = ValidationResult.Success();
 
         // Assert
         var isValidProperty = typeof(ValidationResult).GetProperty(nameof(ValidationResult.IsValid));
@@ -273,8 +269,8 @@ public class ValidationModelComprehensiveTests
         
         // For properties with private init, the SetMethod exists but is not publicly accessible
         // We verify that the setter is not public (init accessors generate internal setters)
-        Assert.True(isValidProperty!.SetMethod == null || !isValidProperty.SetMethod.IsPublic);
-        Assert.True(errorsProperty!.SetMethod == null || !errorsProperty.SetMethod.IsPublic);
+        Assert.True(isValidProperty.SetMethod == null || !isValidProperty.SetMethod.IsPublic);
+        Assert.True(errorsProperty.SetMethod == null || !errorsProperty.SetMethod.IsPublic);
         
         // Additional verification: properties should be readable
         Assert.True(isValidProperty.CanRead);
@@ -390,7 +386,7 @@ public class ValidationModelComprehensiveTests
     public void ValidationException_WithNullErrors_Should_HandleGracefully()
     {
         // Act
-        var exception = new ValidationException((IEnumerable<ValidationError>)null!);
+        var exception = new ValidationException(null!);
 
         // Assert
         Assert.NotNull(exception.Errors);
@@ -411,13 +407,11 @@ public class ValidationModelComprehensiveTests
     public void ValidationException_Errors_Property_Should_BeReadOnly()
     {
         // Arrange
-        var errors = new[] { new ValidationError("Test error") };
-        var exception = new ValidationException(errors);
 
         // Assert
         var errorsProperty = typeof(ValidationException).GetProperty(nameof(ValidationException.Errors));
         Assert.NotNull(errorsProperty);
-        Assert.Null(errorsProperty!.SetMethod);
+        Assert.Null(errorsProperty.SetMethod);
     }
 
     [Fact]
@@ -514,7 +508,7 @@ public class ValidationModelComprehensiveTests
             new ValidationError("Error without property"),
             new ValidationError("", "EmptyMessage"),
             new ValidationError("Valid message", ""),
-            new ValidationError("   ", null)
+            new ValidationError("   ")
         };
 
         // Act

@@ -85,7 +85,7 @@ public class MediatorTests
         var mediator = new Mediator(serviceLocator, mediatorLogger);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.SendAsync((IRequest<string>)null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.SendAsync<string>(null!));
     }
 
     [Fact]
@@ -246,9 +246,7 @@ public class MediatorTests
     }
 
     // Test classes
-    private class TestRequest : IRequest
-    {
-    }
+    private class TestRequest : IRequest;
 
     private class TestRequestHandler : IRequestHandler<TestRequest>
     {
@@ -271,7 +269,7 @@ public class MediatorTests
 
     private class TestRequestWithResponse : IRequest<string>
     {
-        public string Value { get; set; } = string.Empty;
+        public string Value { get; init; } = string.Empty;
     }
 
     private class TestRequestWithResponseHandler : IRequestHandler<TestRequestWithResponse, string>
@@ -293,10 +291,7 @@ public class MediatorTests
         }
     }
 
-    private class TestNotification : INotification
-    {
-        public string Message { get; set; } = "Test notification";
-    }
+    private class TestNotification : INotification;
 
     private class TestNotificationHandler1 : INotificationHandler<TestNotification>
     {

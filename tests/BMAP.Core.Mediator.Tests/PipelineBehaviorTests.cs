@@ -41,18 +41,20 @@ public class PipelineBehaviorTests
     public async Task RequestHandlerDelegate_Should_BeCallable()
     {
         // Arrange
-        var wasCalled = false;
-        RequestHandlerDelegate del = () =>
-        {
-            wasCalled = true;
-            return Task.CompletedTask;
-        };
+        bool wasCalled;
 
         // Act
-        await del();
+        await Del();
 
         // Assert
         Assert.True(wasCalled);
+        return;
+
+        Task Del()
+        {
+            wasCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -60,13 +62,15 @@ public class PipelineBehaviorTests
     {
         // Arrange
         var expectedResponse = "test response";
-        RequestHandlerDelegate<string> del = () => Task.FromResult(expectedResponse);
 
         // Act
-        var result = await del();
+        var result = await Del();
 
         // Assert
         Assert.Equal(expectedResponse, result);
+        return;
+
+        Task<string> Del() => Task.FromResult(expectedResponse);
     }
 
     [Fact]
@@ -76,18 +80,20 @@ public class PipelineBehaviorTests
         var behavior = new TestPipelineBehavior();
         var request = new TestRequest();
         var nextCalled = false;
-        RequestHandlerDelegate next = () =>
-        {
-            nextCalled = true;
-            return Task.CompletedTask;
-        };
 
         // Act
-        await behavior.HandleAsync(request, next);
+        await behavior.HandleAsync(request, Next);
 
         // Assert
         Assert.True(behavior.WasCalled);
         Assert.True(nextCalled);
+        return;
+
+        Task Next()
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -98,19 +104,21 @@ public class PipelineBehaviorTests
         var request = new TestRequestWithResponse();
         var expectedResponse = "test response";
         var nextCalled = false;
-        RequestHandlerDelegate<string> next = () =>
-        {
-            nextCalled = true;
-            return Task.FromResult(expectedResponse);
-        };
 
         // Act
-        var result = await behavior.HandleAsync(request, next);
+        var result = await behavior.HandleAsync(request, Next);
 
         // Assert
         Assert.True(behavior.WasCalled);
         Assert.True(nextCalled);
         Assert.Equal(expectedResponse, result);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult(expectedResponse);
+        }
     }
 
     [Fact]
@@ -120,13 +128,15 @@ public class PipelineBehaviorTests
         var behavior = new TestPipelineBehavior();
         var request = new TestRequest();
         var expectedException = new InvalidOperationException("Test exception");
-        RequestHandlerDelegate next = () => throw expectedException;
 
         // Act & Assert
         var actualException =
-            await Assert.ThrowsAsync<InvalidOperationException>(() => behavior.HandleAsync(request, next));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => behavior.HandleAsync(request, Next));
         Assert.Equal("Test exception", actualException.Message);
         Assert.True(behavior.WasCalled);
+        return;
+
+        Task Next() => throw expectedException;
     }
 
     [Fact]
@@ -136,13 +146,15 @@ public class PipelineBehaviorTests
         var behavior = new TestPipelineBehaviorWithResponse();
         var request = new TestRequestWithResponse();
         var expectedException = new InvalidOperationException("Test exception");
-        RequestHandlerDelegate<string> next = () => throw expectedException;
 
         // Act & Assert
         var actualException =
-            await Assert.ThrowsAsync<InvalidOperationException>(() => behavior.HandleAsync(request, next));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => behavior.HandleAsync(request, Next));
         Assert.Equal("Test exception", actualException.Message);
         Assert.True(behavior.WasCalled);
+        return;
+
+        Task<string> Next() => throw expectedException;
     }
 
     [Fact]
@@ -151,15 +163,17 @@ public class PipelineBehaviorTests
         // Arrange
         var behavior = new TestPipelineBehavior();
         var request = new TestRequest();
-        var cancellationToken = new CancellationToken();
-        RequestHandlerDelegate next = () => Task.CompletedTask;
+        var cancellationToken = CancellationToken.None;
 
         // Act
-        await behavior.HandleAsync(request, next, cancellationToken);
+        await behavior.HandleAsync(request, Next, cancellationToken);
 
         // Assert
         Assert.True(behavior.WasCalled);
         Assert.Equal(cancellationToken, behavior.ReceivedCancellationToken);
+        return;
+
+        static Task Next() => Task.CompletedTask;
     }
 
     [Fact]
@@ -168,25 +182,23 @@ public class PipelineBehaviorTests
         // Arrange
         var behavior = new TestPipelineBehaviorWithResponse();
         var request = new TestRequestWithResponse();
-        var cancellationToken = new CancellationToken();
-        RequestHandlerDelegate<string> next = () => Task.FromResult("response");
+        var cancellationToken = CancellationToken.None;
 
         // Act
-        await behavior.HandleAsync(request, next, cancellationToken);
+        await behavior.HandleAsync(request, Next, cancellationToken);
 
         // Assert
         Assert.True(behavior.WasCalled);
         Assert.Equal(cancellationToken, behavior.ReceivedCancellationToken);
+        return;
+
+        static Task<string> Next() => Task.FromResult("response");
     }
 
     // Test classes
-    private class TestRequest : IRequest
-    {
-    }
+    private class TestRequest : IRequest;
 
-    private class TestRequestWithResponse : IRequest<string>
-    {
-    }
+    private class TestRequestWithResponse : IRequest<string>;
 
     private class TestPipelineBehavior : IPipelineBehavior<TestRequest>
     {

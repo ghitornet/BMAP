@@ -263,13 +263,9 @@ public class ValidationBehaviorTests
     }
 
     // Test classes
-    private class TestRequest : IRequest
-    {
-    }
+    private class TestRequest : IRequest;
 
-    private class TestRequestWithResponse : IRequest<string>
-    {
-    }
+    private class TestRequestWithResponse : IRequest<string>;
 
     private class TestValidator(ValidationResult result) : IValidator<TestRequest>
     {

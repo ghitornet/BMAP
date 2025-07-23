@@ -1,7 +1,7 @@
 namespace BMAP.Core.Mediator.Tests;
 
-/// <summary>
-///     Test cases for IRequest and IRequest<TResponse> interfaces.
+/// <summary TResponse="interfaces.">
+///     Test cases for IRequest and IRequest
 /// </summary>
 public class RequestTests
 {

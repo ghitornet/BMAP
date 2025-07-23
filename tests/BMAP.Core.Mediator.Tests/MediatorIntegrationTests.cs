@@ -89,7 +89,7 @@ public class MediatorIntegrationTests
         var mediator = serviceProvider.GetRequiredService<IMediator>();
 
         var cts = new CancellationTokenSource();
-        cts.Cancel(); // Cancel immediately
+        await cts.CancelAsync(); // Cancel immediately
 
         // Act & Assert
         var request = new CancellableTestRequest();
@@ -153,25 +153,38 @@ public class MediatorIntegrationTests
     }
 
     // Test classes for integration tests
+    
+    /// <summary>
+    /// Simple request without response for testing basic mediator functionality.
+    /// </summary>
     public class SimpleTestRequest : IRequest
     {
         public string Message { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Handler for SimpleTestRequest.
+    /// </summary>
     public class SimpleTestRequestHandler : IRequestHandler<SimpleTestRequest>
     {
         public Task HandleAsync(SimpleTestRequest request, CancellationToken cancellationToken = default)
         {
-            // Simple processing
+            // Simple handler that just completes successfully
             return Task.CompletedTask;
         }
     }
 
+    /// <summary>
+    /// Request with response for testing request-response pattern.
+    /// </summary>
     public class TestRequestWithResponse : IRequest<string>
     {
         public string Input { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Handler for TestRequestWithResponse that processes input and returns a response.
+    /// </summary>
     public class TestRequestWithResponseHandler : IRequestHandler<TestRequestWithResponse, string>
     {
         public Task<string> HandleAsync(TestRequestWithResponse request, CancellationToken cancellationToken = default)
@@ -180,33 +193,46 @@ public class MediatorIntegrationTests
         }
     }
 
+    /// <summary>
+    /// Notification for testing publish-subscribe pattern.
+    /// </summary>
     public class TestNotification : INotification
     {
         public string Data { get; set; } = string.Empty;
     }
 
-    public class TestNotificationHandler1 : INotificationHandler<TestNotification>
+    /// <summary>
+    /// First handler for TestNotification to test multiple handlers scenario.
+    /// </summary>
+    public class TestNotificationHandler : INotificationHandler<TestNotification>
     {
         public Task HandleAsync(TestNotification notification, CancellationToken cancellationToken = default)
         {
-            // Handler 1 processing
+            // Simple handler that just completes successfully
             return Task.CompletedTask;
         }
     }
 
-    public class TestNotificationHandler2 : INotificationHandler<TestNotification>
+    /// <summary>
+    /// Second handler for TestNotification to test multiple handlers scenario.
+    /// </summary>
+    public class AnotherTestNotificationHandler : INotificationHandler<TestNotification>
     {
         public Task HandleAsync(TestNotification notification, CancellationToken cancellationToken = default)
         {
-            // Handler 2 processing
+            // Another handler for the same notification to test multiple handlers
             return Task.CompletedTask;
         }
     }
 
-    public class CancellableTestRequest : IRequest
-    {
-    }
+    /// <summary>
+    /// Request for testing cancellation functionality.
+    /// </summary>
+    public class CancellableTestRequest : IRequest;
 
+    /// <summary>
+    /// Handler for CancellableTestRequest that respects cancellation tokens.
+    /// </summary>
     public class CancellableTestRequestHandler : IRequestHandler<CancellableTestRequest>
     {
         public Task HandleAsync(CancellableTestRequest request, CancellationToken cancellationToken = default)
@@ -216,10 +242,14 @@ public class MediatorIntegrationTests
         }
     }
 
-    public class FailingTestRequest : IRequest
-    {
-    }
+    /// <summary>
+    /// Request for testing exception handling and propagation.
+    /// </summary>
+    public class FailingTestRequest : IRequest;
 
+    /// <summary>
+    /// Handler for FailingTestRequest that always throws an exception for testing error handling.
+    /// </summary>
     public class FailingTestRequestHandler : IRequestHandler<FailingTestRequest>
     {
         public Task HandleAsync(FailingTestRequest request, CancellationToken cancellationToken = default)

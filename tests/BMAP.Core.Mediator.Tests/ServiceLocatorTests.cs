@@ -59,9 +59,10 @@ public class ServiceLocatorTests
         var serviceProvider = services.BuildServiceProvider();
         var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
         var serviceLocator = new ServiceLocator(serviceProvider, logger);
+        var serviceType = typeof(ITestService);
 
         // Act
-        var result = serviceLocator.GetService(typeof(ITestService));
+        var result = serviceLocator.GetService(serviceType);
 
         // Assert
         Assert.NotNull(result);
@@ -76,9 +77,10 @@ public class ServiceLocatorTests
         var serviceProvider = services.BuildServiceProvider();
         var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
         var serviceLocator = new ServiceLocator(serviceProvider, logger);
+        var serviceType = typeof(ITestService);
 
         // Act & Assert
-        var exception = Assert.Throws<InvalidOperationException>(() => serviceLocator.GetService(typeof(ITestService)));
+        var exception = Assert.Throws<InvalidOperationException>(() => serviceLocator.GetService(serviceType));
         Assert.Equal("Service of type ITestService is not registered.", exception.Message);
     }
 
@@ -125,9 +127,10 @@ public class ServiceLocatorTests
         var serviceProvider = services.BuildServiceProvider();
         var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
         var serviceLocator = new ServiceLocator(serviceProvider, logger);
+        var serviceType = typeof(ITestService);
 
         // Act
-        var result = serviceLocator.GetServices(typeof(ITestService));
+        var result = serviceLocator.GetServices(serviceType);
 
         // Assert
         Assert.Equal(2, result.Count());
@@ -191,9 +194,10 @@ public class ServiceLocatorTests
         var serviceProvider = services.BuildServiceProvider();
         var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
         var serviceLocator = new ServiceLocator(serviceProvider, logger);
+        var serviceType = typeof(ITestService);
 
         // Act
-        var result = serviceLocator.GetServiceOrDefault(typeof(ITestService));
+        var result = serviceLocator.GetServiceOrDefault(serviceType);
 
         // Assert
         Assert.NotNull(result);
@@ -208,9 +212,10 @@ public class ServiceLocatorTests
         var serviceProvider = services.BuildServiceProvider();
         var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
         var serviceLocator = new ServiceLocator(serviceProvider, logger);
+        var serviceType = typeof(ITestService);
 
         // Act
-        var result = serviceLocator.GetServiceOrDefault(typeof(ITestService));
+        var result = serviceLocator.GetServiceOrDefault(serviceType);
 
         // Assert
         Assert.Null(result);
@@ -230,6 +235,76 @@ public class ServiceLocatorTests
         Assert.Equal("serviceType", exception.ParamName);
     }
 
+    [Fact]
+    public void GetService_Type_Should_WorkWithRuntimeTypes()
+    {
+        // Arrange - This test demonstrates a legitimate use case for the Type overload
+        // when the type is only known at runtime
+        var services = new ServiceCollection();
+        services.AddTransient<ITestService, TestService>();
+        services.AddTransient<IAnotherTestService, AnotherTestServiceImpl>();
+        var serviceProvider = services.BuildServiceProvider();
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
+
+        var serviceTypes = new[] { typeof(ITestService), typeof(IAnotherTestService) };
+
+        // Act & Assert
+        foreach (var serviceType in serviceTypes)
+        {
+            var service = serviceLocator.GetService(serviceType);
+            Assert.NotNull(service);
+            Assert.IsAssignableFrom(serviceType, service);
+        }
+    }
+
+    [Fact]
+    public void GetServices_Type_Should_WorkWithRuntimeTypes()
+    {
+        // Arrange - This test demonstrates a legitimate use case for the Type overload
+        // when the type is only known at runtime
+        var services = new ServiceCollection();
+        services.AddTransient<ITestService, TestService>();
+        services.AddTransient<ITestService, AnotherTestService>();
+        var serviceProvider = services.BuildServiceProvider();
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
+
+        var serviceTypes = new[] { typeof(ITestService) };
+
+        // Act & Assert
+        foreach (var serviceType in serviceTypes)
+        {
+            var serviceList = serviceLocator.GetServices(serviceType);
+            Assert.Equal(2, serviceList.Count());
+            Assert.All(serviceList, service => Assert.IsAssignableFrom(serviceType, service));
+        }
+    }
+
+    [Fact]
+    public void GetServiceOrDefault_Type_Should_WorkWithRuntimeTypes()
+    {
+        // Arrange - This test demonstrates a legitimate use case for the Type overload
+        // when the type is only known at runtime
+        var services = new ServiceCollection();
+        services.AddTransient<ITestService, TestService>();
+        var serviceProvider = services.BuildServiceProvider();
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
+
+        var registeredType = typeof(ITestService);
+        var unregisteredType = typeof(IAnotherTestService);
+
+        // Act
+        var registeredService = serviceLocator.GetServiceOrDefault(registeredType);
+        var unregisteredService = serviceLocator.GetServiceOrDefault(unregisteredType);
+
+        // Assert
+        Assert.NotNull(registeredService);
+        Assert.IsAssignableFrom<ITestService>(registeredService);
+        Assert.Null(unregisteredService);
+    }
+
     // Test interfaces and classes
     private interface ITestService
     {
@@ -240,6 +315,14 @@ public class ServiceLocatorTests
     }
 
     private class AnotherTestService : ITestService
+    {
+    }
+
+    private interface IAnotherTestService
+    {
+    }
+
+    private class AnotherTestServiceImpl : IAnotherTestService
     {
     }
 }

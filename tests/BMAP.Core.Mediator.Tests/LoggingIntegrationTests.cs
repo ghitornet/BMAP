@@ -2,7 +2,6 @@ using BMAP.Core.Mediator.Extensions;
 using BMAP.Core.Mediator.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 
 namespace BMAP.Core.Mediator.Tests;
@@ -190,7 +189,7 @@ public class LoggingIntegrationTests
         var request = new TestLogRequestWithoutHandler { Message = "Test logging" };
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<HandlerNotFoundException>(() => mediator.SendAsync(request));
+        await Assert.ThrowsAsync<HandlerNotFoundException>(() => mediator.SendAsync(request));
         
         var logMessages = logOutput.ToString();
         Assert.Contains("Sending request of type TestLogRequestWithoutHandler", logMessages);
@@ -285,39 +284,24 @@ public class LoggingIntegrationTests
 /// <summary>
 /// Simple test logger provider that captures log output to a StringBuilder.
 /// </summary>
-public class TestLoggerProvider : ILoggerProvider
+public class TestLoggerProvider(StringBuilder logOutput) : ILoggerProvider
 {
-    private readonly StringBuilder _logOutput;
-
-    public TestLoggerProvider(StringBuilder logOutput)
-    {
-        _logOutput = logOutput;
-    }
-
     public ILogger CreateLogger(string categoryName)
     {
-        return new TestLogger(_logOutput, categoryName);
+        return new TestLogger(logOutput, categoryName);
     }
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }
 
 /// <summary>
 /// Simple test logger that writes to a StringBuilder.
 /// </summary>
-public class TestLogger : ILogger
+public class TestLogger(StringBuilder logOutput, string categoryName) : ILogger
 {
-    private readonly StringBuilder _logOutput;
-    private readonly string _categoryName;
-
-    public TestLogger(StringBuilder logOutput, string categoryName)
-    {
-        _logOutput = logOutput;
-        _categoryName = categoryName;
-    }
-
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull
     {
         return null;
@@ -331,6 +315,6 @@ public class TestLogger : ILogger
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         var message = formatter(state, exception);
-        _logOutput.AppendLine($"[{logLevel}] [{_categoryName}] {message}");
+        logOutput.AppendLine($"[{logLevel}] [{categoryName}] {message}");
     }
 }

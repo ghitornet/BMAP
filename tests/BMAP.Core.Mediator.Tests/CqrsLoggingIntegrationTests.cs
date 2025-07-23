@@ -194,7 +194,7 @@ public class CqrsLoggingIntegrationTests
         var command = new TestCqrsLogMissingCommand { Name = "missing handler" };
         
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<HandlerNotFoundException>(() => mediator.SendAsync(command));
+        await Assert.ThrowsAsync<HandlerNotFoundException>(() => mediator.SendAsync(command));
         
         var logMessages = logOutput.ToString();
         Assert.Contains("Sending command of type TestCqrsLogMissingCommand", logMessages);

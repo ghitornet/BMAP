@@ -22,12 +22,6 @@ public class CommandLoggingBehaviorTests
         var command = new TestLogCommand { Name = "Test Command" };
         var nextCalled = false;
 
-        Task Next()
-        {
-            nextCalled = true;
-            return Task.CompletedTask;
-        }
-
         // Act
         await behavior.HandleAsync(command, Next);
 
@@ -37,6 +31,13 @@ public class CommandLoggingBehaviorTests
         Assert.Contains("Executing command TestLogCommand", logs);
         Assert.Contains("executed successfully", logs);
         Assert.Contains("ms", logs); // Timing information
+        return;
+
+        Task Next()
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -49,11 +50,6 @@ public class CommandLoggingBehaviorTests
         var command = new TestLogCommand { Name = "Failing Command" };
         var expectedException = new InvalidOperationException("Test exception");
 
-        Task Next()
-        {
-            throw expectedException;
-        }
-
         // Act & Assert
         var thrownException = await Assert.ThrowsAsync<InvalidOperationException>(() => behavior.HandleAsync(command, Next));
         Assert.Same(expectedException, thrownException);
@@ -62,6 +58,12 @@ public class CommandLoggingBehaviorTests
         Assert.Contains("Executing command TestLogCommand", logs);
         Assert.Contains("failed after", logs);
         Assert.Contains("Test exception", logs);
+        return;
+
+        Task Next()
+        {
+            throw expectedException;
+        }
     }
 
     [Fact]
@@ -73,12 +75,6 @@ public class CommandLoggingBehaviorTests
         var behavior = new CommandLoggingBehavior<TestLogCommand>(logger);
         var command = new TestLogCommand { Name = "Slow Command" };
 
-        async Task Next()
-        {
-            // Simulate slow execution (note: this is a simplified test - in reality you'd use more sophisticated timing simulation)
-            await Task.Delay(10); // Short delay for test purposes
-        }
-
         // Act
         await behavior.HandleAsync(command, Next);
 
@@ -86,6 +82,13 @@ public class CommandLoggingBehaviorTests
         var logs = logOutput.ToString();
         Assert.Contains("Executing command TestLogCommand", logs);
         Assert.Contains("executed successfully", logs);
+        return;
+
+        static async Task Next()
+        {
+            // Simulate slow execution (note: this is a simplified test - in reality you'd use more sophisticated timing simulation)
+            await Task.Delay(10); // Short delay for test purposes
+        }
     }
 
     [Fact]
@@ -105,17 +108,18 @@ public class CommandLoggingBehaviorTests
         var cts = new CancellationTokenSource();
         var receivedToken = default(CancellationToken);
 
-        Task Next()
-        {
-            receivedToken = cts.Token;
-            return Task.CompletedTask;
-        }
-
         // Act
         await behavior.HandleAsync(command, Next, cts.Token);
 
         // Assert
         Assert.Equal(cts.Token, receivedToken);
+        return;
+
+        Task Next()
+        {
+            receivedToken = cts.Token;
+            return Task.CompletedTask;
+        }
     }
 
     #endregion
@@ -133,12 +137,6 @@ public class CommandLoggingBehaviorTests
         var expectedResponse = "Test Response";
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult(expectedResponse);
-        }
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
@@ -150,6 +148,13 @@ public class CommandLoggingBehaviorTests
         Assert.Contains("expecting response String", logs);
         Assert.Contains("executed successfully", logs);
         Assert.Contains("with response type String", logs);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult(expectedResponse);
+        }
     }
 
     [Fact]
@@ -162,11 +167,6 @@ public class CommandLoggingBehaviorTests
         var command = new TestLogCommandWithResponse { Name = "Failing Command" };
         var expectedException = new InvalidOperationException("Test exception");
 
-        Task<string> Next()
-        {
-            throw expectedException;
-        }
-
         // Act & Assert
         var thrownException = await Assert.ThrowsAsync<InvalidOperationException>(() => behavior.HandleAsync(command, Next));
         Assert.Same(expectedException, thrownException);
@@ -175,6 +175,12 @@ public class CommandLoggingBehaviorTests
         Assert.Contains("Executing command TestLogCommandWithResponse", logs);
         Assert.Contains("failed after", logs);
         Assert.Contains("Test exception", logs);
+        return;
+
+        Task<string> Next()
+        {
+            throw expectedException;
+        }
     }
 
     [Fact]
@@ -186,12 +192,6 @@ public class CommandLoggingBehaviorTests
         var behavior = new CommandLoggingBehavior<TestLogCommandWithResponse, string>(logger);
         var command = new TestLogCommandWithResponse { Name = "Slow Command" };
 
-        async Task<string> Next()
-        {
-            await Task.Delay(10); // Short delay for test purposes
-            return "Success";
-        }
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
@@ -200,6 +200,13 @@ public class CommandLoggingBehaviorTests
         var logs = logOutput.ToString();
         Assert.Contains("Executing command TestLogCommandWithResponse", logs);
         Assert.Contains("executed successfully", logs);
+        return;
+
+        static async Task<string> Next()
+        {
+            await Task.Delay(10); // Short delay for test purposes
+            return "Success";
+        }
     }
 
     [Fact]
@@ -219,17 +226,18 @@ public class CommandLoggingBehaviorTests
         var cts = new CancellationTokenSource();
         var receivedToken = default(CancellationToken);
 
-        Task<string> Next()
-        {
-            receivedToken = cts.Token;
-            return Task.FromResult("Success");
-        }
-
         // Act
         await behavior.HandleAsync(command, Next, cts.Token);
 
         // Assert
         Assert.Equal(cts.Token, receivedToken);
+        return;
+
+        Task<string> Next()
+        {
+            receivedToken = cts.Token;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -241,11 +249,6 @@ public class CommandLoggingBehaviorTests
         var behavior = new CommandLoggingBehavior<TestLogCommandWithResponse, string?>(logger);
         var command = new TestLogCommandWithResponse { Name = "Null Response Command" };
 
-        Task<string?> Next()
-        {
-            return Task.FromResult<string?>(null);
-        }
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
@@ -253,6 +256,12 @@ public class CommandLoggingBehaviorTests
         Assert.Null(result);
         var logs = logOutput.ToString();
         Assert.Contains("executed successfully", logs);
+        return;
+
+        static Task<string?> Next()
+        {
+            return Task.FromResult<string?>(null);
+        }
     }
 
     [Fact]
@@ -264,12 +273,13 @@ public class CommandLoggingBehaviorTests
         var behavior = new CommandLoggingBehavior<TestLogCommand>(logger);
         var command = new TestLogCommand { Name = "Test" };
 
-        Task Next() => Task.CompletedTask;
-
         // Act
         await behavior.HandleAsync(command, Next);
+        return;
 
         // Assert - no exception should be thrown
+
+        static Task Next() => Task.CompletedTask;
     }
 
     [Fact]
@@ -281,13 +291,14 @@ public class CommandLoggingBehaviorTests
         var behavior = new CommandLoggingBehavior<TestLogCommandWithResponse, string>(logger);
         var command = new TestLogCommandWithResponse { Name = "Test" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act
         var result = await behavior.HandleAsync(command, Next);
 
         // Assert
         Assert.Equal("Success", result);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     #endregion

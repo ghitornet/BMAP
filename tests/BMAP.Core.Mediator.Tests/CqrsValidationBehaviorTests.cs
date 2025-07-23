@@ -37,10 +37,6 @@ public class CqrsValidationBehaviorTests
         
         // Act & Assert
         await mediator.SendAsync(command); // Should not throw
-        
-        var logMessages = logOutput.ToString();
-        // Note: The validation behavior may not log these exact messages depending on implementation
-        // The test validates that no exception was thrown, which means validation passed
     }
     
     [Fact]
@@ -120,10 +116,6 @@ public class CqrsValidationBehaviorTests
         // Assert
         Assert.NotNull(result);
         Assert.Contains("User 123", result);
-        
-        var logMessages = logOutput.ToString();
-        // Note: These specific log messages may not exist since we're using the generic validation behavior
-        // The test validates that no exception was thrown, which means validation passed
     }
     
     [Fact]
@@ -178,9 +170,6 @@ public class CqrsValidationBehaviorTests
         await mediator.SendAsync(command);
         
         // Assert
-        var logMessages = logOutput.ToString();
-        // Note: These specific log messages may not exist since we're using the generic validation behavior
-        // The test validates that no exception was thrown, which means validation passed
     }
 
     // Test classes

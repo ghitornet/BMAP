@@ -1,5 +1,4 @@
 using BMAP.Core.Mediator.Behaviors;
-using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace BMAP.Core.Mediator.Tests;
@@ -73,12 +72,6 @@ public class QueryLoggingBehaviorTests
         var behavior = new QueryLoggingBehavior<TestLogQuery, string>(logger);
         var query = new TestLogQuery { SearchTerm = "slow query" };
 
-        async Task<string> Next()
-        {
-            await Task.Delay(20); // Short delay for test purposes
-            return "Slow Result";
-        }
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
@@ -87,6 +80,13 @@ public class QueryLoggingBehaviorTests
         var logs = logOutput.ToString();
         Assert.Contains("Executing query TestLogQuery", logs);
         Assert.Contains("executed successfully", logs);
+        return;
+
+        static async Task<string> Next()
+        {
+            await Task.Delay(20); // Short delay for test purposes
+            return "Slow Result";
+        }
     }
 
     [Fact]
@@ -164,10 +164,11 @@ public class QueryLoggingBehaviorTests
     }
 
     [Fact]
-    public async Task QueryLoggingBehavior_NullLogger_Should_ThrowArgumentNullException()
+    public Task QueryLoggingBehavior_NullLogger_Should_ThrowArgumentNullException()
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new QueryLoggingBehavior<TestLogQuery, string>(null!));
+        return Task.CompletedTask;
     }
 
     [Fact]
@@ -178,7 +179,7 @@ public class QueryLoggingBehaviorTests
         var behavior = new QueryLoggingBehavior<TestLogQuery, string>(logger);
         var query = new TestLogQuery { SearchTerm = "test" };
         var cts = new CancellationTokenSource();
-        var receivedToken = default(CancellationToken);
+        var receivedToken = CancellationToken.None;
 
         Task<string> Next()
         {
@@ -202,11 +203,6 @@ public class QueryLoggingBehaviorTests
         var behavior = new QueryLoggingBehavior<TestLogQuery, string?>(logger);
         var query = new TestLogQuery { SearchTerm = "null result query" };
 
-        Task<string?> Next()
-        {
-            return Task.FromResult<string?>(null);
-        }
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
@@ -214,6 +210,12 @@ public class QueryLoggingBehaviorTests
         Assert.Null(result);
         var logs = logOutput.ToString();
         Assert.Contains("executed successfully", logs);
+        return;
+
+        static Task<string?> Next()
+        {
+            return Task.FromResult<string?>(null);
+        }
     }
 
     [Fact]
@@ -249,13 +251,14 @@ public class QueryLoggingBehaviorTests
         var behavior = new QueryLoggingBehavior<TestLogQuery, string>(logger);
         var query = new TestLogQuery { SearchTerm = "test" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
         // Assert
         Assert.Equal("Success", result);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     [Fact]
@@ -267,12 +270,6 @@ public class QueryLoggingBehaviorTests
         var behavior = new QueryLoggingBehavior<TestLogQuery, string>(logger);
         var query = new TestLogQuery { SearchTerm = "cacheable query" };
 
-        async Task<string> Next()
-        {
-            await Task.Delay(5); // Small delay to simulate moderate duration
-            return "Cacheable Result";
-        }
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
@@ -280,6 +277,13 @@ public class QueryLoggingBehaviorTests
         Assert.Equal("Cacheable Result", result);
         var logs = logOutput.ToString();
         Assert.Contains("executed successfully", logs);
+        return;
+
+        static async Task<string> Next()
+        {
+            await Task.Delay(5); // Small delay to simulate moderate duration
+            return "Cacheable Result";
+        }
     }
 
     #region Test Helper Classes
@@ -288,8 +292,6 @@ public class QueryLoggingBehaviorTests
     public class TestLogQuery : IQuery<string>
     {
         public string SearchTerm { get; set; } = string.Empty;
-        public int PageSize { get; set; } = 10;
-        public int PageNumber { get; set; } = 1;
     }
 
     public class TestListQuery : IQuery<List<string>>

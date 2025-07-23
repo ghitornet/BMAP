@@ -12,16 +12,16 @@ public class ErrorTypeTests
     public void ErrorType_Should_Have_Expected_Values()
     {
         // Assert - Verify all expected enum values exist
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.None));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.General));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.Validation));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.NotFound));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.Conflict));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.Unauthorized));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.Forbidden));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.Internal));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.External));
-        Assert.True(Enum.IsDefined(typeof(ErrorType), ErrorType.Custom));
+        Assert.True(Enum.IsDefined(ErrorType.None));
+        Assert.True(Enum.IsDefined(ErrorType.General));
+        Assert.True(Enum.IsDefined(ErrorType.Validation));
+        Assert.True(Enum.IsDefined(ErrorType.NotFound));
+        Assert.True(Enum.IsDefined(ErrorType.Conflict));
+        Assert.True(Enum.IsDefined(ErrorType.Unauthorized));
+        Assert.True(Enum.IsDefined(ErrorType.Forbidden));
+        Assert.True(Enum.IsDefined(ErrorType.Internal));
+        Assert.True(Enum.IsDefined(ErrorType.External));
+        Assert.True(Enum.IsDefined(ErrorType.Custom));
     }
 
     [Fact]
@@ -76,18 +76,6 @@ public class ErrorTypeTests
     }
 
     [Fact]
-    public void ErrorType_Should_Support_Equality()
-    {
-        // Assert - Verify enum equality works as expected
-        Assert.True(ErrorType.None == ErrorType.None);
-        Assert.True(ErrorType.Validation == ErrorType.Validation);
-        Assert.True(ErrorType.None != ErrorType.General);
-        
-        Assert.True(ErrorType.None.Equals(ErrorType.None));
-        Assert.False(ErrorType.Validation.Equals(ErrorType.NotFound));
-    }
-
-    [Fact]
     public void ErrorType_Should_Have_Stable_Hash_Codes()
     {
         // Arrange & Act
@@ -103,27 +91,29 @@ public class ErrorTypeTests
     [Fact]
     public void ErrorType_Should_Work_In_Switch_Expressions()
     {
-        // Arrange & Act
-        var getMessage = (ErrorType type) => type switch
-        {
-            ErrorType.None => "No error",
-            ErrorType.General => "General error",
-            ErrorType.Validation => "Validation error",
-            ErrorType.NotFound => "Not found error",
-            ErrorType.Conflict => "Conflict error",
-            ErrorType.Unauthorized => "Unauthorized error",
-            ErrorType.Forbidden => "Forbidden error",
-            ErrorType.Internal => "Internal error",
-            ErrorType.External => "External error",
-            ErrorType.Custom => "Custom error",
-            _ => "Unknown error"
-        };
-
         // Assert
-        Assert.Equal("No error", getMessage(ErrorType.None));
-        Assert.Equal("Validation error", getMessage(ErrorType.Validation));
-        Assert.Equal("Not found error", getMessage(ErrorType.NotFound));
-        Assert.Equal("Internal error", getMessage(ErrorType.Internal));
+        Assert.Equal("No error", GetMessage(ErrorType.None));
+        Assert.Equal("Validation error", GetMessage(ErrorType.Validation));
+        Assert.Equal("Not found error", GetMessage(ErrorType.NotFound));
+        Assert.Equal("Internal error", GetMessage(ErrorType.Internal));
+        return;
+
+        // Arrange & Act
+        static string GetMessage(ErrorType type) =>
+            type switch
+            {
+                ErrorType.None => "No error",
+                ErrorType.General => "General error",
+                ErrorType.Validation => "Validation error",
+                ErrorType.NotFound => "Not found error",
+                ErrorType.Conflict => "Conflict error",
+                ErrorType.Unauthorized => "Unauthorized error",
+                ErrorType.Forbidden => "Forbidden error",
+                ErrorType.Internal => "Internal error",
+                ErrorType.External => "External error",
+                ErrorType.Custom => "Custom error",
+                _ => "Unknown error"
+            };
     }
 
     [Fact]
@@ -231,7 +221,7 @@ public class ErrorTypeTests
         var invalidType = (ErrorType)999;
         
         // The enum value exists but is not defined
-        Assert.False(Enum.IsDefined(typeof(ErrorType), invalidType));
+        Assert.False(Enum.IsDefined(invalidType));
         
         // But it should still have a numeric value
         Assert.Equal(999, (int)invalidType);

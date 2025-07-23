@@ -324,14 +324,14 @@ public class InterfaceAndModelTests
     #region Test Helper Classes
 
     // Test requests
-    public class TestSimpleRequest : IRequest { }
-    public class TestRequestWithResponse : IRequest<string> { }
-    public class TestAnotherRequest : IRequest { }
+    public class TestSimpleRequest : IRequest;
+    public class TestRequestWithResponse : IRequest<string>;
+    public class TestAnotherRequest : IRequest;
     public class TestGenericRequest<T> : IRequest<T> { public T? Value { get; set; } }
 
     // Test commands
-    public class TestSimpleCommand : ICommand { }
-    public class TestCommandWithResponse : ICommand<string> { }
+    public class TestSimpleCommand : ICommand;
+    public class TestCommandWithResponse : ICommand<string>;
     public class TestCommandWithProperties : ICommand
     {
         public string Name { get; set; } = string.Empty;
@@ -341,7 +341,7 @@ public class InterfaceAndModelTests
     }
 
     // Test queries
-    public class TestSimpleQuery : IQuery<string> { }
+    public class TestSimpleQuery : IQuery<string>;
     public class TestQueryWithProperties : IQuery<List<string>>
     {
         public string SearchTerm { get; set; } = string.Empty;
@@ -356,7 +356,7 @@ public class InterfaceAndModelTests
     public class TestBoolQuery : IQuery<bool> { public string Condition { get; set; } = string.Empty; }
 
     // Test notifications
-    public class TestSimpleNotification : INotification { }
+    public class TestSimpleNotification : INotification;
     public class TestNotificationWithProperties : INotification
     {
         public Guid EventId { get; set; }
@@ -365,7 +365,7 @@ public class InterfaceAndModelTests
         public string Data { get; set; } = string.Empty;
         public string Source { get; set; } = string.Empty;
     }
-    public class TestAnotherNotification : INotification { }
+    public class TestAnotherNotification : INotification;
 
     // Test handlers
     public class TestSimpleRequestHandler : IRequestHandler<TestSimpleRequest>

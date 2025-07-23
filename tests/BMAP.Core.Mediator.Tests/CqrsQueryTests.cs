@@ -121,11 +121,6 @@ public class CqrsQueryTests
                 Email = $"user{request.UserId}@example.com"
             });
         }
-        
-        public static void Reset()
-        {
-            WasExecuted = false;
-        }
     }
 
     public class TestGetProductQuery : IQuery<TestProductDto>
@@ -153,11 +148,6 @@ public class CqrsQueryTests
                 Name = $"Product {request.ProductId}",
                 Price = request.ProductId * 10.0m
             });
-        }
-        
-        public static void Reset()
-        {
-            WasExecuted = false;
         }
     }
 }

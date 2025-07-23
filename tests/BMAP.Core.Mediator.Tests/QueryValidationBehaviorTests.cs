@@ -1,5 +1,4 @@
 using BMAP.Core.Mediator.Behaviors;
-using Microsoft.Extensions.Logging;
 
 namespace BMAP.Core.Mediator.Tests;
 
@@ -19,18 +18,19 @@ public class QueryValidationBehaviorTests
         var query = new TestQuery { SearchTerm = "test" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
         // Assert
         Assert.True(nextCalled);
         Assert.Equal("Success", result);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -44,12 +44,6 @@ public class QueryValidationBehaviorTests
         var query = new TestQuery { SearchTerm = "valid search" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
@@ -57,6 +51,13 @@ public class QueryValidationBehaviorTests
         Assert.True(nextCalled);
         Assert.Equal("Success", result);
         Assert.True(validator.WasCalled);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -71,18 +72,19 @@ public class QueryValidationBehaviorTests
         var query = new TestQuery { SearchTerm = "" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(query, Next));
         Assert.False(nextCalled);
         Assert.True(validator.WasCalled);
         Assert.Single(exception.Errors);
         Assert.Equal("Search term is required", exception.Errors.First().Message);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -97,12 +99,6 @@ public class QueryValidationBehaviorTests
         var query = new TestQuery { SearchTerm = "valid" };
         var nextCalled = false;
 
-        Task<string> Next()
-        {
-            nextCalled = true;
-            return Task.FromResult("Success");
-        }
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
@@ -111,6 +107,13 @@ public class QueryValidationBehaviorTests
         Assert.Equal("Success", result);
         Assert.True(validator1.WasCalled);
         Assert.True(validator2.WasCalled);
+        return;
+
+        Task<string> Next()
+        {
+            nextCalled = true;
+            return Task.FromResult("Success");
+        }
     }
 
     [Fact]
@@ -126,13 +129,14 @@ public class QueryValidationBehaviorTests
         var behavior = new QueryValidationBehavior<TestQuery, string>(validators, logger);
         var query = new TestQuery { SearchTerm = "" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(query, Next));
         Assert.Equal(2, exception.Errors.Count());
         Assert.Contains(exception.Errors, e => e.Message == "Search term is required");
         Assert.Contains(exception.Errors, e => e.Message == "Page size too large");
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     [Fact]
@@ -145,13 +149,14 @@ public class QueryValidationBehaviorTests
         var behavior = new QueryValidationBehavior<TestQuery, string>(validators, logger);
         var query = new TestQuery { SearchTerm = "test" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(() => behavior.HandleAsync(query, Next));
         Assert.Contains("Error occurred during validation", exception.Message);
         Assert.Single(exception.Errors);
         Assert.Equal("Test query validation exception", exception.Errors.First().Message);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     [Fact]
@@ -175,13 +180,14 @@ public class QueryValidationBehaviorTests
         var query = new TestQuery { SearchTerm = "test" };
         var cts = new CancellationTokenSource();
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act
         await behavior.HandleAsync(query, Next, cts.Token);
 
         // Assert
         Assert.Equal(cts.Token, validator.ReceivedCancellationToken);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     [Fact]
@@ -195,14 +201,15 @@ public class QueryValidationBehaviorTests
         var behavior = new QueryValidationBehavior<TestQuery, string>(validators, logger);
         var query = new TestQuery { SearchTerm = "test" };
 
-        Task<string> Next() => Task.FromResult("Success");
-
         // Act
         var result = await behavior.HandleAsync(query, Next);
 
         // Assert
         Assert.Equal("Success", result);
         Assert.True(validator.WasCalled);
+        return;
+
+        static Task<string> Next() => Task.FromResult("Success");
     }
 
     #region Test Helper Classes
@@ -216,39 +223,25 @@ public class QueryValidationBehaviorTests
     }
 
     // Test validators
-    public class TestQueryValidator : IValidator<TestQuery>
+    public class TestQueryValidator(ValidationResult result) : IValidator<TestQuery>
     {
-        private readonly ValidationResult _result;
-
-        public TestQueryValidator(ValidationResult result)
-        {
-            _result = result;
-        }
-
         public bool WasCalled { get; private set; }
 
         public Task<ValidationResult> ValidateAsync(TestQuery request, CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            return Task.FromResult(_result);
+            return Task.FromResult(result);
         }
     }
 
-    public class TestQueryValidator2 : IValidator<TestQuery>
+    public class TestQueryValidator2(ValidationResult result) : IValidator<TestQuery>
     {
-        private readonly ValidationResult _result;
-
-        public TestQueryValidator2(ValidationResult result)
-        {
-            _result = result;
-        }
-
         public bool WasCalled { get; private set; }
 
         public Task<ValidationResult> ValidateAsync(TestQuery request, CancellationToken cancellationToken = default)
         {
             WasCalled = true;
-            return Task.FromResult(_result);
+            return Task.FromResult(result);
         }
     }
 
