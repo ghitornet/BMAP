@@ -123,7 +123,8 @@ public class ValidationBehaviorTests
     {
         // Arrange
         var validators = Enumerable.Empty<IValidator<TestRequestWithResponse>>();
-        var behavior = new ValidationBehavior<TestRequestWithResponse, string>(validators);
+        var logger = MockLoggerHelper.CreateNullLogger<ValidationBehavior<TestRequestWithResponse, string>>();
+        var behavior = new ValidationBehavior<TestRequestWithResponse, string>(validators, logger);
         var request = new TestRequestWithResponse();
         var nextCalled = false;
 
@@ -147,7 +148,8 @@ public class ValidationBehaviorTests
         // Arrange
         var validator = new TestValidatorWithResponse(ValidationResult.Success());
         var validators = new[] { validator };
-        var behavior = new ValidationBehavior<TestRequestWithResponse, string>(validators);
+        var logger = MockLoggerHelper.CreateNullLogger<ValidationBehavior<TestRequestWithResponse, string>>();
+        var behavior = new ValidationBehavior<TestRequestWithResponse, string>(validators, logger);
         var request = new TestRequestWithResponse();
         var nextCalled = false;
 
@@ -173,7 +175,8 @@ public class ValidationBehaviorTests
         var error = new ValidationError("Validation error");
         var validator = new TestValidatorWithResponse(ValidationResult.Failure(error));
         var validators = new[] { validator };
-        var behavior = new ValidationBehavior<TestRequestWithResponse, string>(validators);
+        var logger = MockLoggerHelper.CreateNullLogger<ValidationBehavior<TestRequestWithResponse, string>>();
+        var behavior = new ValidationBehavior<TestRequestWithResponse, string>(validators, logger);
         var request = new TestRequestWithResponse();
         var nextCalled = false;
         Task<string> Next()
@@ -193,7 +196,8 @@ public class ValidationBehaviorTests
     {
         // Arrange
         var validators = Enumerable.Empty<IValidator<TestRequest>>();
-        var behavior = new ValidationBehavior<TestRequest>(validators);
+        var logger = MockLoggerHelper.CreateNullLogger<ValidationBehavior<TestRequest>>();
+        var behavior = new ValidationBehavior<TestRequest>(validators, logger);
         var request = new TestRequest();
         var nextCalled = false;
 
@@ -216,7 +220,8 @@ public class ValidationBehaviorTests
         // Arrange
         var validator = new TestValidator(ValidationResult.Success());
         var validators = new[] { validator };
-        var behavior = new ValidationBehavior<TestRequest>(validators);
+        var logger = MockLoggerHelper.CreateNullLogger<ValidationBehavior<TestRequest>>();
+        var behavior = new ValidationBehavior<TestRequest>(validators, logger);
         var request = new TestRequest();
         var nextCalled = false;
 
@@ -241,7 +246,8 @@ public class ValidationBehaviorTests
         var error = new ValidationError("Validation error");
         var validator = new TestValidator(ValidationResult.Failure(error));
         var validators = new[] { validator };
-        var behavior = new ValidationBehavior<TestRequest>(validators);
+        var logger = MockLoggerHelper.CreateNullLogger<ValidationBehavior<TestRequest>>();
+        var behavior = new ValidationBehavior<TestRequest>(validators, logger);
         var request = new TestRequest();
         var nextCalled = false;
         Task Next()

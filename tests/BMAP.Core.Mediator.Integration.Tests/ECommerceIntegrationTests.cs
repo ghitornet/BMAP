@@ -1,6 +1,7 @@
 using BMAP.Core.Mediator.Exceptions;
 using BMAP.Core.Mediator.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BMAP.Core.Mediator.Integration.Tests;
 
@@ -20,6 +21,13 @@ public class ECommerceIntegrationTests : IDisposable
     private static ServiceProvider CreateServiceProvider()
     {
         var services = new ServiceCollection();
+
+        // Add logging services (required for mediator logging dependencies)
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
 
         // Register mediator with assembly scanning
         services.AddMediatorFromAssemblyContaining<ECommerceIntegrationTests>();

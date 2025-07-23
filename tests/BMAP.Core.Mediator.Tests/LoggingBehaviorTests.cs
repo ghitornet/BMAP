@@ -11,7 +11,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithResponse_Should_CallNext_AndReturnResponse()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequestWithResponse, string>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequestWithResponse, string>>();
+        var behavior = new LoggingBehavior<TestRequestWithResponse, string>(logger);
         var request = new TestRequestWithResponse();
         var expectedResponse = "Test Response";
         var nextCalled = false;
@@ -34,7 +35,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithResponse_Should_PropagateExceptions()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequestWithResponse, string>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequestWithResponse, string>>();
+        var behavior = new LoggingBehavior<TestRequestWithResponse, string>(logger);
         var request = new TestRequestWithResponse();
         var expectedException = new InvalidOperationException("Test exception");
 
@@ -50,7 +52,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithoutResponse_Should_CallNext()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequest>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequest>>();
+        var behavior = new LoggingBehavior<TestRequest>(logger);
         var request = new TestRequest();
         var nextCalled = false;
 
@@ -71,7 +74,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithoutResponse_Should_PropagateExceptions()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequest>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequest>>();
+        var behavior = new LoggingBehavior<TestRequest>(logger);
         var request = new TestRequest();
         var expectedException = new InvalidOperationException("Test exception");
 
@@ -87,7 +91,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithResponse_Should_HandleSlowOperations()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequestWithResponse, string>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequestWithResponse, string>>();
+        var behavior = new LoggingBehavior<TestRequestWithResponse, string>(logger);
         var request = new TestRequestWithResponse();
         var expectedResponse = "Slow Response";
 
@@ -108,7 +113,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithoutResponse_Should_HandleSlowOperations()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequest>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequest>>();
+        var behavior = new LoggingBehavior<TestRequest>(logger);
         var request = new TestRequest();
         var nextCalled = false;
 
@@ -129,7 +135,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithResponse_Should_AcceptCancellationToken()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequestWithResponse, string>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequestWithResponse, string>>();
+        var behavior = new LoggingBehavior<TestRequestWithResponse, string>(logger);
         var request = new TestRequestWithResponse();
         var expectedResponse = "Response";
         var cancellationToken = CancellationToken.None;
@@ -147,7 +154,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithoutResponse_Should_AcceptCancellationToken()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequest>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequest>>();
+        var behavior = new LoggingBehavior<TestRequest>(logger);
         var request = new TestRequest();
         var nextCalled = false;
         var cancellationToken = CancellationToken.None;
@@ -169,7 +177,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithResponse_Should_HandleCancellation()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequestWithResponse, string>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequestWithResponse, string>>();
+        var behavior = new LoggingBehavior<TestRequestWithResponse, string>(logger);
         var request = new TestRequestWithResponse();
         var cts = new CancellationTokenSource();
         await cts.CancelAsync(); // Cancel immediately
@@ -188,7 +197,8 @@ public class LoggingBehaviorTests
     public async Task LoggingBehavior_WithoutResponse_Should_HandleCancellation()
     {
         // Arrange
-        var behavior = new LoggingBehavior<TestRequest>();
+        var logger = MockLoggerHelper.CreateNullLogger<LoggingBehavior<TestRequest>>();
+        var behavior = new LoggingBehavior<TestRequest>(logger);
         var request = new TestRequest();
         var cts = new CancellationTokenSource();
         await cts.CancelAsync(); // Cancel immediately

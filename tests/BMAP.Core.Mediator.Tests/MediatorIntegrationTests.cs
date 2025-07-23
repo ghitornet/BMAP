@@ -1,6 +1,7 @@
 using BMAP.Core.Mediator.Exceptions;
 using BMAP.Core.Mediator.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BMAP.Core.Mediator.Tests;
 
@@ -14,6 +15,14 @@ public class MediatorIntegrationTests
     {
         // Arrange
         var services = new ServiceCollection();
+        
+        // Add logging services (required for mediator logging dependencies)
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+        
         services.AddMediatorFromAssemblyContaining<MediatorIntegrationTests>();
 
         var serviceProvider = services.BuildServiceProvider();
@@ -38,6 +47,14 @@ public class MediatorIntegrationTests
     {
         // Arrange
         var services = new ServiceCollection();
+        
+        // Add logging services (required for mediator logging dependencies)
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+        
         services.AddMediatorFromAssemblyContaining<MediatorIntegrationTests>();
 
         var serviceProvider = services.BuildServiceProvider();
@@ -58,6 +75,14 @@ public class MediatorIntegrationTests
     {
         // Arrange
         var services = new ServiceCollection();
+        
+        // Add logging services (required for mediator logging dependencies)
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+        
         services.AddMediatorFromAssemblyContaining<MediatorIntegrationTests>();
 
         var serviceProvider = services.BuildServiceProvider();
@@ -77,6 +102,14 @@ public class MediatorIntegrationTests
     {
         // Arrange
         var services = new ServiceCollection();
+        
+        // Add logging services (required for mediator logging dependencies)
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+        
         services.AddMediatorFromAssemblyContaining<MediatorIntegrationTests>();
 
         var serviceProvider = services.BuildServiceProvider();
@@ -97,6 +130,14 @@ public class MediatorIntegrationTests
     {
         // Arrange
         var services = new ServiceCollection();
+        
+        // Add logging services (required for mediator logging dependencies)
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+        
         services.AddMediatorFromAssemblyContaining<MediatorIntegrationTests>();
 
         var serviceProvider = services.BuildServiceProvider();

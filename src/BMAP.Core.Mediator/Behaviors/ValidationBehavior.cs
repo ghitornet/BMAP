@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace BMAP.Core.Mediator.Behaviors;
 
 /// <summary>
@@ -124,9 +126,12 @@ public class ValidationException : Exception
 ///     Initializes a new instance of the ValidationBehavior class.
 /// </remarks>
 /// <param name="validators">The validators for the request type.</param>
-public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
+/// <param name="logger">The logger instance.</param>
+public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators, ILogger<ValidationBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
+    private readonly ILogger<ValidationBehavior<TRequest, TResponse>> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
     /// <summary>
     ///     Handles the request and validates it before processing.
     /// </summary>
@@ -138,19 +143,48 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
     public async Task<TResponse> HandleAsync(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken = default)
     {
-        if (!validators.Any()) return await next();
+        var requestType = typeof(TRequest).Name;
+        var validatorList = validators.ToList();
+        
+        if (validatorList.Count == 0)
+        {
+            _logger.LogDebug("No validators found for request type {RequestType}, skipping validation", requestType);
+            return await next();
+        }
 
-        var validationTasks = validators.Select(v => v.ValidateAsync(request, cancellationToken));
-        var validationResults = await Task.WhenAll(validationTasks);
+        _logger.LogDebug("Starting validation for request type {RequestType} with {ValidatorCount} validators", 
+            requestType, validatorList.Count);
 
-        var errors = validationResults
-            .Where(r => !r.IsValid)
-            .SelectMany(r => r.Errors)
-            .ToList();
+        try
+        {
+            var validationTasks = validatorList.Select(v => v.ValidateAsync(request, cancellationToken));
+            var validationResults = await Task.WhenAll(validationTasks);
 
-        if (errors.Count != 0) throw new ValidationException(errors);
+            var errors = validationResults
+                .Where(r => !r.IsValid)
+                .SelectMany(r => r.Errors)
+                .ToList();
 
-        return await next();
+            if (errors.Count != 0)
+            {
+                _logger.LogWarning("Validation failed for request type {RequestType} with {ErrorCount} errors: {Errors}", 
+                    requestType, errors.Count, errors.Select(e => e.Message));
+                throw new ValidationException(errors);
+            }
+
+            _logger.LogDebug("Validation completed successfully for request type {RequestType}", requestType);
+            return await next();
+        }
+        catch (ValidationException)
+        {
+            // Re-throw validation exceptions without logging as error (already logged as warning)
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error occurred during validation for request type {RequestType}", requestType);
+            throw;
+        }
     }
 }
 
@@ -162,9 +196,12 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
 ///     Initializes a new instance of the ValidationBehavior class.
 /// </remarks>
 /// <param name="validators">The validators for the request type.</param>
-public class ValidationBehavior<TRequest>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest>
+/// <param name="logger">The logger instance.</param>
+public class ValidationBehavior<TRequest>(IEnumerable<IValidator<TRequest>> validators, ILogger<ValidationBehavior<TRequest>> logger) : IPipelineBehavior<TRequest>
     where TRequest : IRequest
 {
+    private readonly ILogger<ValidationBehavior<TRequest>> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
     /// <summary>
     ///     Handles the request and validates it before processing.
     /// </summary>
@@ -176,22 +213,48 @@ public class ValidationBehavior<TRequest>(IEnumerable<IValidator<TRequest>> vali
     public async Task HandleAsync(TRequest request, RequestHandlerDelegate next,
         CancellationToken cancellationToken = default)
     {
-        if (!validators.Any())
+        var requestType = typeof(TRequest).Name;
+        var validatorList = validators.ToList();
+        
+        if (validatorList.Count == 0)
         {
+            _logger.LogDebug("No validators found for request type {RequestType}, skipping validation", requestType);
             await next();
             return;
         }
 
-        var validationTasks = validators.Select(v => v.ValidateAsync(request, cancellationToken));
-        var validationResults = await Task.WhenAll(validationTasks);
+        _logger.LogDebug("Starting validation for request type {RequestType} with {ValidatorCount} validators", 
+            requestType, validatorList.Count);
 
-        var errors = validationResults
-            .Where(r => !r.IsValid)
-            .SelectMany(r => r.Errors)
-            .ToList();
+        try
+        {
+            var validationTasks = validatorList.Select(v => v.ValidateAsync(request, cancellationToken));
+            var validationResults = await Task.WhenAll(validationTasks);
 
-        if (errors.Count != 0) throw new ValidationException(errors);
+            var errors = validationResults
+                .Where(r => !r.IsValid)
+                .SelectMany(r => r.Errors)
+                .ToList();
 
-        await next();
+            if (errors.Count != 0)
+            {
+                _logger.LogWarning("Validation failed for request type {RequestType} with {ErrorCount} errors: {Errors}", 
+                    requestType, errors.Count, errors.Select(e => e.Message));
+                throw new ValidationException(errors);
+            }
+
+            _logger.LogDebug("Validation completed successfully for request type {RequestType}", requestType);
+            await next();
+        }
+        catch (ValidationException)
+        {
+            // Re-throw validation exceptions without logging as error (already logged as warning)
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error occurred during validation for request type {RequestType}", requestType);
+            throw;
+        }
     }
 }

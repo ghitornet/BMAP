@@ -11,8 +11,11 @@ public class MediatorTests
     [Fact]
     public void Constructor_Should_ThrowArgumentNullException_WhenServiceLocatorIsNull()
     {
+        // Arrange
+        var logger = MockLoggerHelper.CreateNullLogger<Mediator>();
+
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => new Mediator(null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new Mediator(null!, logger));
         Assert.Equal("serviceLocator", exception.ParamName);
     }
 
@@ -22,8 +25,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.SendAsync((TestRequest)null!));
@@ -35,8 +40,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var request = new TestRequest();
 
         // Act & Assert
@@ -52,8 +59,10 @@ public class MediatorTests
         var services = new ServiceCollection();
         services.AddSingleton<IRequestHandler<TestRequest>, TestRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var request = new TestRequest();
 
         // Act
@@ -70,8 +79,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.SendAsync((IRequest<string>)null!));
@@ -83,8 +94,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var request = new TestRequestWithResponse();
 
         // Act & Assert
@@ -100,8 +113,10 @@ public class MediatorTests
         var services = new ServiceCollection();
         services.AddSingleton<IRequestHandler<TestRequestWithResponse, string>, TestRequestWithResponseHandler>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var request = new TestRequestWithResponse { Value = "test" };
 
         // Act
@@ -119,8 +134,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.PublishAsync((TestNotification)null!));
@@ -132,8 +149,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var notification = new TestNotification();
 
         // Act & Assert - Should not throw
@@ -152,8 +171,10 @@ public class MediatorTests
         services.AddSingleton<INotificationHandler<TestNotification>, TestNotificationHandler1>();
         services.AddSingleton<INotificationHandler<TestNotification>, TestNotificationHandler2>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var notification = new TestNotification();
 
         // Act
@@ -173,8 +194,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() => mediator.PublishAndWaitAsync((TestNotification)null!));
@@ -186,8 +209,10 @@ public class MediatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var notification = new TestNotification();
 
         // Act & Assert - Should not throw
@@ -206,8 +231,10 @@ public class MediatorTests
         services.AddSingleton<INotificationHandler<TestNotification>, TestNotificationHandler1>();
         services.AddSingleton<INotificationHandler<TestNotification>, TestNotificationHandler2>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
-        var mediator = new Mediator(serviceLocator);
+        var serviceLocatorLogger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, serviceLocatorLogger);
+        var mediatorLogger = MockLoggerHelper.CreateNullLogger<Mediator>();
+        var mediator = new Mediator(serviceLocator, mediatorLogger);
         var notification = new TestNotification();
 
         // Act

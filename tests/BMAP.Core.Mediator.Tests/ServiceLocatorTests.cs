@@ -10,8 +10,11 @@ public class ServiceLocatorTests
     [Fact]
     public void Constructor_Should_ThrowArgumentNullException_WhenServiceProviderIsNull()
     {
+        // Arrange
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => new ServiceLocator(null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new ServiceLocator(null!, logger));
         Assert.Equal("serviceProvider", exception.ParamName);
     }
 
@@ -22,7 +25,8 @@ public class ServiceLocatorTests
         var services = new ServiceCollection();
         services.AddTransient<ITestService, TestService>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetService<ITestService>();
@@ -38,7 +42,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act & Assert
         var exception = Assert.Throws<InvalidOperationException>(() => serviceLocator.GetService<ITestService>());
@@ -52,7 +57,8 @@ public class ServiceLocatorTests
         var services = new ServiceCollection();
         services.AddTransient<ITestService, TestService>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetService(typeof(ITestService));
@@ -68,7 +74,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act & Assert
         var exception = Assert.Throws<InvalidOperationException>(() => serviceLocator.GetService(typeof(ITestService)));
@@ -81,7 +88,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() => serviceLocator.GetService(null!));
@@ -96,7 +104,8 @@ public class ServiceLocatorTests
         services.AddTransient<ITestService, TestService>();
         services.AddTransient<ITestService, AnotherTestService>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetServices<ITestService>();
@@ -114,7 +123,8 @@ public class ServiceLocatorTests
         services.AddTransient<ITestService, TestService>();
         services.AddTransient<ITestService, AnotherTestService>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetServices(typeof(ITestService));
@@ -130,7 +140,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() => serviceLocator.GetServices(null!));
@@ -144,7 +155,8 @@ public class ServiceLocatorTests
         var services = new ServiceCollection();
         services.AddTransient<ITestService, TestService>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetServiceOrDefault<ITestService>();
@@ -160,7 +172,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetServiceOrDefault<ITestService>();
@@ -176,7 +189,8 @@ public class ServiceLocatorTests
         var services = new ServiceCollection();
         services.AddTransient<ITestService, TestService>();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetServiceOrDefault(typeof(ITestService));
@@ -192,7 +206,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act
         var result = serviceLocator.GetServiceOrDefault(typeof(ITestService));
@@ -207,7 +222,8 @@ public class ServiceLocatorTests
         // Arrange
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
-        var serviceLocator = new ServiceLocator(serviceProvider);
+        var logger = MockLoggerHelper.CreateNullLogger<ServiceLocator>();
+        var serviceLocator = new ServiceLocator(serviceProvider, logger);
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() => serviceLocator.GetServiceOrDefault(null!));

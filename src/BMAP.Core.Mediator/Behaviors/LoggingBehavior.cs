@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace BMAP.Core.Mediator.Behaviors;
 
@@ -11,6 +12,17 @@ namespace BMAP.Core.Mediator.Behaviors;
 public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
+    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
+
+    /// <summary>
+    ///     Initializes a new instance of the LoggingBehavior class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     /// <summary>
     ///     Handles the request and logs execution time.
     /// </summary>
@@ -24,19 +36,23 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         var requestName = typeof(TRequest).Name;
         var stopwatch = Stopwatch.StartNew();
 
+        _logger.LogInformation("Starting execution of request {RequestName} with data: {@Request}", requestName, request);
+
         try
         {
-            Console.WriteLine($"[MEDIATOR] Handling {requestName}");
             var response = await next();
             stopwatch.Stop();
-            Console.WriteLine($"[MEDIATOR] Handled {requestName} in {stopwatch.ElapsedMilliseconds}ms");
+            
+            _logger.LogInformation("Successfully completed request {RequestName} in {ElapsedMilliseconds}ms", 
+                requestName, stopwatch.ElapsedMilliseconds);
+            
             return response;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            Console.WriteLine(
-                $"[MEDIATOR] Error handling {requestName} after {stopwatch.ElapsedMilliseconds}ms: {ex.Message}");
+            _logger.LogError(ex, "Error occurred while handling request {RequestName} after {ElapsedMilliseconds}ms", 
+                requestName, stopwatch.ElapsedMilliseconds);
             throw;
         }
     }
@@ -50,6 +66,17 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
 public class LoggingBehavior<TRequest> : IPipelineBehavior<TRequest>
     where TRequest : IRequest
 {
+    private readonly ILogger<LoggingBehavior<TRequest>> _logger;
+
+    /// <summary>
+    ///     Initializes a new instance of the LoggingBehavior class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    public LoggingBehavior(ILogger<LoggingBehavior<TRequest>> logger)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     /// <summary>
     ///     Handles the request and logs execution time.
     /// </summary>
@@ -63,18 +90,21 @@ public class LoggingBehavior<TRequest> : IPipelineBehavior<TRequest>
         var requestName = typeof(TRequest).Name;
         var stopwatch = Stopwatch.StartNew();
 
+        _logger.LogInformation("Starting execution of request {RequestName} with data: {@Request}", requestName, request);
+
         try
         {
-            Console.WriteLine($"[MEDIATOR] Handling {requestName}");
             await next();
             stopwatch.Stop();
-            Console.WriteLine($"[MEDIATOR] Handled {requestName} in {stopwatch.ElapsedMilliseconds}ms");
+            
+            _logger.LogInformation("Successfully completed request {RequestName} in {ElapsedMilliseconds}ms", 
+                requestName, stopwatch.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            Console.WriteLine(
-                $"[MEDIATOR] Error handling {requestName} after {stopwatch.ElapsedMilliseconds}ms: {ex.Message}");
+            _logger.LogError(ex, "Error occurred while handling request {RequestName} after {ElapsedMilliseconds}ms", 
+                requestName, stopwatch.ElapsedMilliseconds);
             throw;
         }
     }

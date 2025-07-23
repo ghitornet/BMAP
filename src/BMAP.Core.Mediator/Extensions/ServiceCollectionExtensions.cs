@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace BMAP.Core.Mediator.Extensions;
 
@@ -16,8 +17,18 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for method chaining.</returns>
     public static IServiceCollection AddMediator(this IServiceCollection services)
     {
-        services.TryAddTransient<IServiceLocator, ServiceLocator>();
-        services.TryAddTransient<IMediator, Mediator>();
+        services.TryAddTransient<IServiceLocator>(serviceProvider =>
+        {
+            var logger = serviceProvider.GetRequiredService<ILogger<ServiceLocator>>();
+            return new ServiceLocator(serviceProvider, logger);
+        });
+        
+        services.TryAddTransient<IMediator>(serviceProvider =>
+        {
+            var serviceLocator = serviceProvider.GetRequiredService<IServiceLocator>();
+            var logger = serviceProvider.GetRequiredService<ILogger<Mediator>>();
+            return new Mediator(serviceLocator, logger);
+        });
 
         return services;
     }
