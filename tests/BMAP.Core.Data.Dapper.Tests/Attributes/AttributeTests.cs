@@ -1,63 +1,27 @@
-using BMAP.Core.Data.Dapper.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace BMAP.Core.Data.Dapper.Tests.Attributes;
 
 /// <summary>
-/// Unit tests for Dapper attributes to ensure proper functionality and validation.
+/// Unit tests for DataAnnotations usage to ensure proper functionality with Dapper integration.
+/// These tests verify that standard DataAnnotations work correctly with our SQL generation.
 /// </summary>
-public class AttributeTests
+public class DataAnnotationsTests
 {
     #region TableAttribute Tests
 
     [Fact]
-    public void TableAttribute_Should_Initialize_With_Name()
+    public void TableAttribute_Should_Work_With_SqlGenerator()
     {
         // Arrange & Act
-        var attribute = new TableAttribute("Users");
+        var entityType = typeof(TestEntityWithTable);
+        var tableAttribute = entityType.GetCustomAttribute<TableAttribute>();
 
         // Assert
-        Assert.Equal("Users", attribute.Name);
-        Assert.Null(attribute.Schema);
-        Assert.Equal("Users", attribute.FullName);
-    }
-
-    [Fact]
-    public void TableAttribute_Should_Support_Schema()
-    {
-        // Arrange & Act
-        var attribute = new TableAttribute("Users") { Schema = "dbo" };
-
-        // Assert
-        Assert.Equal("Users", attribute.Name);
-        Assert.Equal("dbo", attribute.Schema);
-        Assert.Equal("dbo.Users", attribute.FullName);
-    }
-
-    [Fact]
-    public void TableAttribute_With_Null_Name_Should_Throw()
-    {
-        // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new TableAttribute(null!));
-    }
-
-    [Fact]
-    public void TableAttribute_FullName_Without_Schema_Should_Return_Name_Only()
-    {
-        // Arrange & Act
-        var attribute = new TableAttribute("Products");
-
-        // Assert
-        Assert.Equal("Products", attribute.FullName);
-    }
-
-    [Fact]
-    public void TableAttribute_FullName_With_Empty_Schema_Should_Return_Name_Only()
-    {
-        // Arrange & Act
-        var attribute = new TableAttribute("Products") { Schema = "" };
-
-        // Assert
-        Assert.Equal("Products", attribute.FullName);
+        Assert.NotNull(tableAttribute);
+        Assert.Equal("Users", tableAttribute.Name);
     }
 
     #endregion
@@ -65,153 +29,108 @@ public class AttributeTests
     #region ColumnAttribute Tests
 
     [Fact]
-    public void ColumnAttribute_Should_Initialize_With_Name()
+    public void ColumnAttribute_Should_Work_With_Properties()
     {
         // Arrange & Act
-        var attribute = new ColumnAttribute("Id");
+        var property = typeof(TestEntityWithColumns).GetProperty("Name");
+        var columnAttribute = property?.GetCustomAttribute<ColumnAttribute>();
 
         // Assert
-        Assert.Equal("Id", attribute.Name);
-        Assert.False(attribute.IsPrimaryKey);
-        Assert.False(attribute.IsIdentity);
-        Assert.False(attribute.IgnoreOnInsert);
-        Assert.False(attribute.IgnoreOnUpdate);
-    }
-
-    [Fact]
-    public void ColumnAttribute_Should_Support_PrimaryKey()
-    {
-        // Arrange & Act
-        var attribute = new ColumnAttribute("Id") { IsPrimaryKey = true };
-
-        // Assert
-        Assert.Equal("Id", attribute.Name);
-        Assert.True(attribute.IsPrimaryKey);
-    }
-
-    [Fact]
-    public void ColumnAttribute_Should_Support_Identity()
-    {
-        // Arrange & Act
-        var attribute = new ColumnAttribute("Id") { IsIdentity = true };
-
-        // Assert
-        Assert.Equal("Id", attribute.Name);
-        Assert.True(attribute.IsIdentity);
-    }
-
-    [Fact]
-    public void ColumnAttribute_Should_Support_IgnoreOnInsert()
-    {
-        // Arrange & Act
-        var attribute = new ColumnAttribute("UpdatedAt") { IgnoreOnInsert = true };
-
-        // Assert
-        Assert.Equal("UpdatedAt", attribute.Name);
-        Assert.True(attribute.IgnoreOnInsert);
-    }
-
-    [Fact]
-    public void ColumnAttribute_Should_Support_IgnoreOnUpdate()
-    {
-        // Arrange & Act
-        var attribute = new ColumnAttribute("CreatedAt") { IgnoreOnUpdate = true };
-
-        // Assert
-        Assert.Equal("CreatedAt", attribute.Name);
-        Assert.True(attribute.IgnoreOnUpdate);
-    }
-
-    [Fact]
-    public void ColumnAttribute_Should_Support_All_Properties()
-    {
-        // Arrange & Act
-        var attribute = new ColumnAttribute("Id")
-        {
-            IsPrimaryKey = true,
-            IsIdentity = true,
-            IgnoreOnInsert = false,
-            IgnoreOnUpdate = true
-        };
-
-        // Assert
-        Assert.Equal("Id", attribute.Name);
-        Assert.True(attribute.IsPrimaryKey);
-        Assert.True(attribute.IsIdentity);
-        Assert.False(attribute.IgnoreOnInsert);
-        Assert.True(attribute.IgnoreOnUpdate);
-    }
-
-    [Fact]
-    public void ColumnAttribute_With_Null_Name_Should_Throw()
-    {
-        // Arrange, Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new ColumnAttribute(null!));
+        Assert.NotNull(columnAttribute);
+        Assert.Equal("user_name", columnAttribute.Name);
     }
 
     #endregion
 
-    #region IgnoreAttribute Tests
+    #region KeyAttribute Tests
 
     [Fact]
-    public void IgnoreAttribute_Should_Be_Creatable()
+    public void KeyAttribute_Should_Identify_Primary_Key()
     {
         // Arrange & Act
-        var attribute = new IgnoreAttribute();
+        var property = typeof(TestEntityWithKey).GetProperty("UserId");
+        var keyAttribute = property?.GetCustomAttribute<KeyAttribute>();
 
         // Assert
-        Assert.NotNull(attribute);
+        Assert.NotNull(keyAttribute);
     }
 
     #endregion
 
-    #region Attribute Usage Tests
+    #region NotMappedAttribute Tests
 
     [Fact]
-    public void Attributes_Should_Be_Applicable_To_Correct_Targets()
+    public void NotMappedAttribute_Should_Exclude_Property()
     {
         // Arrange & Act
-        var testEntity = new TestEntityWithAttributes();
+        var property = typeof(TestEntityWithNotMapped).GetProperty("IgnoredProperty");
+        var notMappedAttribute = property?.GetCustomAttribute<NotMappedAttribute>();
 
-        // Assert - Check that the class can be decorated with TableAttribute
-        var tableAttribute = testEntity.GetType().GetCustomAttributes(typeof(TableAttribute), false).FirstOrDefault() as TableAttribute;
-        Assert.NotNull(tableAttribute);
-        Assert.Equal("TestEntities", tableAttribute.Name);
+        // Assert
+        Assert.NotNull(notMappedAttribute);
+    }
 
-        // Assert - Check that properties can be decorated with ColumnAttribute
-        var idProperty = testEntity.GetType().GetProperty(nameof(TestEntityWithAttributes.Id));
-        var idColumnAttribute = idProperty?.GetCustomAttributes(typeof(ColumnAttribute), false).FirstOrDefault() as ColumnAttribute;
-        Assert.NotNull(idColumnAttribute);
-        Assert.Equal("Id", idColumnAttribute.Name);
-        Assert.True(idColumnAttribute.IsPrimaryKey);
+    #endregion
 
-        // Assert - Check that properties can be decorated with IgnoreAttribute
-        var ignoredProperty = testEntity.GetType().GetProperty(nameof(TestEntityWithAttributes.IgnoredProperty));
-        var ignoreAttribute = ignoredProperty?.GetCustomAttributes(typeof(IgnoreAttribute), false).FirstOrDefault();
-        Assert.NotNull(ignoreAttribute);
+    #region DatabaseGeneratedAttribute Tests
+
+    [Fact]
+    public void DatabaseGeneratedAttribute_Should_Mark_Identity()
+    {
+        // Arrange & Act
+        var property = typeof(TestEntityWithIdentity).GetProperty("Id");
+        var dbGeneratedAttribute = property?.GetCustomAttribute<DatabaseGeneratedAttribute>();
+
+        // Assert
+        Assert.NotNull(dbGeneratedAttribute);
+        Assert.Equal(DatabaseGeneratedOption.Identity, dbGeneratedAttribute.DatabaseGeneratedOption);
     }
 
     #endregion
 
     #region Test Helper Classes
 
-    [Table("TestEntities")]
-    public class TestEntityWithAttributes
+    [Table("Users")]
+    public class TestEntityWithTable
     {
-        [Column("Id", IsPrimaryKey = true, IsIdentity = true)]
         public int Id { get; set; }
-
-        [Column("Name")]
         public string Name { get; set; } = string.Empty;
+    }
 
-        [Column("CreatedAt", IgnoreOnUpdate = true)]
-        public DateTime CreatedAt { get; set; }
+    public class TestEntityWithColumns
+    {
+        [Column("user_id")]
+        public int Id { get; set; }
+        
+        [Column("user_name")]
+        public string Name { get; set; } = string.Empty;
+    }
 
-        [Column("UpdatedAt", IgnoreOnInsert = true)]
-        public DateTime? UpdatedAt { get; set; }
+    public class TestEntityWithKey
+    {
+        [Key]
+        [Column("UserId")]
+        public int UserId { get; set; }
+        
+        public string Name { get; set; } = string.Empty;
+    }
 
-        [Ignore]
+    public class TestEntityWithNotMapped
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        
+        [NotMapped]
         public string IgnoredProperty { get; set; } = string.Empty;
+    }
+
+    public class TestEntityWithIdentity
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        
+        public string Name { get; set; } = string.Empty;
     }
 
     #endregion

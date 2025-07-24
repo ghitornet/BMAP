@@ -1,5 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
-using BMAP.Core.Data.Dapper.Attributes;
 using BMAP.Core.Data.Dapper.Extensions;
 using BMAP.Core.Data.Dapper.Handlers;
 using BMAP.Core.Data.Entities;
@@ -310,7 +311,9 @@ public class DapperHandlersIntegrationTests : IDisposable
     [Table("Users")]
     public class TestUser : IAuditableEntity
     {
-        [Column("Id", IsPrimaryKey = true, IsIdentity = true)]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("Id")]
         public int Id { get; set; }
 
         [Column("Name")]

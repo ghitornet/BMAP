@@ -1,13 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text;
-using BMAP.Core.Data.Dapper.Attributes;
 using BMAP.Core.Data.Entities;
 
 namespace BMAP.Core.Data.Dapper.Helpers;
 
 /// <summary>
 /// Provides SQL generation utilities for entity operations.
-/// This class uses reflection to analyze entity properties and attributes to generate appropriate SQL statements.
+/// This class uses reflection to analyze entity properties and DataAnnotations to generate appropriate SQL statements.
 /// </summary>
 public static class SqlGenerator
 {
@@ -262,18 +263,18 @@ public static class SqlGenerator
     private static string GetTableName(Type entityType)
     {
         var tableAttribute = entityType.GetCustomAttribute<TableAttribute>();
-        return tableAttribute?.FullName ?? entityType.Name;
+        return tableAttribute?.Name ?? entityType.Name;
     }
 
     private static string GetPrimaryKeyColumn(Type entityType)
     {
-        // First look for explicit primary key attribute
-        var property = entityType.GetProperties()
-            .FirstOrDefault(p => p.GetCustomAttribute<ColumnAttribute>()?.IsPrimaryKey == true);
+        // First look for [Key] attribute
+        var keyProperty = entityType.GetProperties()
+            .FirstOrDefault(p => p.GetCustomAttribute<KeyAttribute>() != null);
 
-        if (property != null)
+        if (keyProperty != null)
         {
-            return GetColumnName(property);
+            return GetColumnName(keyProperty);
         }
 
         // Fall back to Id property
@@ -295,42 +296,46 @@ public static class SqlGenerator
     private static IEnumerable<string> GetColumnNames(Type entityType)
     {
         return entityType.GetProperties()
-            .Where(p => p.GetCustomAttribute<IgnoreAttribute>() == null)
+            .Where(p => p.GetCustomAttribute<NotMappedAttribute>() == null)
             .Select(GetColumnName);
     }
 
     private static IEnumerable<string> GetInsertColumns(Type entityType)
     {
         return entityType.GetProperties()
-            .Where(p => p.GetCustomAttribute<IgnoreAttribute>() == null)
-            .Where(p => p.GetCustomAttribute<ColumnAttribute>()?.IgnoreOnInsert != true)
-            .Where(p => p.GetCustomAttribute<ColumnAttribute>()?.IsIdentity != true)
+            .Where(p => p.GetCustomAttribute<NotMappedAttribute>() == null)
+            .Where(p => !IsIdentityColumn(p))
             .Select(GetColumnName);
     }
 
     private static IEnumerable<string> GetUpdateColumns(Type entityType)
     {
-        var primaryKeyProperty = entityType.GetProperties()
-            .FirstOrDefault(p => p.GetCustomAttribute<ColumnAttribute>()?.IsPrimaryKey == true);
+        var keyProperty = entityType.GetProperties()
+            .FirstOrDefault(p => p.GetCustomAttribute<KeyAttribute>() != null);
         
-        if (primaryKeyProperty == null)
+        if (keyProperty == null)
         {
-            primaryKeyProperty = entityType.GetProperty("Id");
+            keyProperty = entityType.GetProperty("Id");
         }
 
         return entityType.GetProperties()
-            .Where(p => p.GetCustomAttribute<IgnoreAttribute>() == null)
-            .Where(p => p.GetCustomAttribute<ColumnAttribute>()?.IgnoreOnUpdate != true)
-            .Where(p => p.GetCustomAttribute<ColumnAttribute>()?.IsPrimaryKey != true)
-            .Where(p => p.GetCustomAttribute<ColumnAttribute>()?.IsIdentity != true)
-            .Where(p => primaryKeyProperty == null || p.Name != primaryKeyProperty.Name) // Explicitly exclude primary key
+            .Where(p => p.GetCustomAttribute<NotMappedAttribute>() == null)
+            .Where(p => p.GetCustomAttribute<KeyAttribute>() == null) // Exclude primary key
+            .Where(p => !IsIdentityColumn(p)) // Exclude identity columns
+            .Where(p => keyProperty == null || p.Name != keyProperty.Name) // Explicitly exclude primary key
             .Select(GetColumnName);
     }
 
     private static bool HasIdentityColumn(Type entityType)
     {
         return entityType.GetProperties()
-            .Any(p => p.GetCustomAttribute<ColumnAttribute>()?.IsIdentity == true);
+            .Any(p => IsIdentityColumn(p));
+    }
+
+    private static bool IsIdentityColumn(PropertyInfo property)
+    {
+        var dbGeneratedAttribute = property.GetCustomAttribute<DatabaseGeneratedAttribute>();
+        return dbGeneratedAttribute?.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;
     }
 
     private static string GetPropertyNameFromColumn(Type entityType, string columnName)

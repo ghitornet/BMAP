@@ -1,11 +1,12 @@
-using BMAP.Core.Data.Dapper.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using BMAP.Core.Data.Dapper.Helpers;
 using BMAP.Core.Data.Entities;
 
 namespace BMAP.Core.Data.Dapper.Tests.Helpers;
 
 /// <summary>
-/// Unit tests for SqlGenerator to ensure proper SQL statement generation.
+/// Unit tests for SqlGenerator to ensure proper SQL statement generation with DataAnnotations.
 /// </summary>
 public class SqlGeneratorTests
 {
@@ -34,16 +35,6 @@ public class SqlGeneratorTests
     }
 
     [Fact]
-    public void GenerateSelectById_With_Schema_Should_Include_Schema()
-    {
-        // Arrange & Act
-        var sql = SqlGenerator.GenerateSelectById<TestEntityWithSchema>();
-
-        // Assert
-        Assert.Contains("FROM dbo.Products", sql);
-    }
-
-    [Fact]
     public void GenerateSelectById_With_Custom_Primary_Key_Should_Use_Custom_Key()
     {
         // Arrange & Act
@@ -66,15 +57,15 @@ public class SqlGeneratorTests
     }
 
     [Fact]
-    public void GenerateSelectById_With_Ignored_Properties_Should_Exclude_Them()
+    public void GenerateSelectById_With_NotMapped_Properties_Should_Exclude_Them()
     {
         // Arrange & Act
-        var sql = SqlGenerator.GenerateSelectById<TestEntityWithIgnored>();
+        var sql = SqlGenerator.GenerateSelectById<TestEntityWithNotMapped>();
 
         // Assert
         Assert.Contains("Id", sql);
         Assert.Contains("Name", sql);
-        Assert.DoesNotContain("IgnoredProperty", sql);
+        Assert.DoesNotContain("NotMappedProperty", sql);
     }
 
     #endregion
@@ -161,17 +152,6 @@ public class SqlGeneratorTests
         Assert.Contains("SELECT last_insert_rowid();", sql); // SQLite syntax for identity retrieval
     }
 
-    [Fact]
-    public void GenerateInsert_With_IgnoreOnInsert_Should_Exclude_Column()
-    {
-        // Arrange & Act
-        var sql = SqlGenerator.GenerateInsert<TestEntityWithIgnoreOnInsert>();
-
-        // Assert
-        Assert.Contains("Name", sql);
-        Assert.DoesNotContain("UpdatedAt", sql); // Should be ignored on insert
-    }
-
     #endregion
 
     #region GenerateUpdate Tests
@@ -199,17 +179,6 @@ public class SqlGeneratorTests
         Assert.True(setClauseMatch.Success);
         var setClause = setClauseMatch.Groups[1].Value;
         Assert.DoesNotContain("Id =", setClause); // Primary key should not be in SET clause
-    }
-
-    [Fact]
-    public void GenerateUpdate_With_IgnoreOnUpdate_Should_Exclude_Column()
-    {
-        // Arrange & Act
-        var sql = SqlGenerator.GenerateUpdate<TestEntityWithIgnoreOnUpdate>();
-
-        // Assert
-        Assert.Contains("Name =", sql);
-        Assert.DoesNotContain("CreatedAt =", sql); // Should be ignored on update
     }
 
     #endregion
@@ -321,16 +290,10 @@ public class SqlGeneratorTests
         public string Name { get; set; } = string.Empty;
     }
 
-    [Table("Products", Schema = "dbo")]
-    public class TestEntityWithSchema
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
-
     public class TestEntityWithCustomPrimaryKey
     {
-        [Column("UserId", IsPrimaryKey = true)]
+        [Key]
+        [Column("UserId")]
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
@@ -347,13 +310,13 @@ public class SqlGeneratorTests
         public string Email { get; set; } = string.Empty;
     }
 
-    public class TestEntityWithIgnored
+    public class TestEntityWithNotMapped
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         
-        [Ignore]
-        public string IgnoredProperty { get; set; } = string.Empty;
+        [NotMapped]
+        public string NotMappedProperty { get; set; } = string.Empty;
     }
 
     public class TestSoftDeletableEntity : ISoftDeletable
@@ -367,27 +330,10 @@ public class SqlGeneratorTests
 
     public class TestEntityWithIdentity
     {
-        [Column("Id", IsIdentity = true)]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-    }
-
-    public class TestEntityWithIgnoreOnInsert
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        
-        [Column("UpdatedAt", IgnoreOnInsert = true)]
-        public DateTime? UpdatedAt { get; set; }
-    }
-
-    public class TestEntityWithIgnoreOnUpdate
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        
-        [Column("CreatedAt", IgnoreOnUpdate = true)]
-        public DateTime CreatedAt { get; set; }
     }
 
     #endregion

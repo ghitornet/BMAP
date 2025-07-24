@@ -5,9 +5,9 @@ Dapper implementation for BMAP.Core.Data providing high-performance data access 
 ## Features
 
 - High-Performance Data Access: Built on Dapper for maximum performance
-- Automatic SQL Generation: Attributes-based SQL generation for CRUD operations
+- Automatic SQL Generation: Uses standard .NET DataAnnotations for SQL generation
 - CQRS Handler Implementation: Complete implementation of all CRUD handlers
-- Attribute-Based Mapping: Simple attributes to control database mapping
+- Standard Annotations: Uses familiar DataAnnotations for mapping control
 - Audit Trail Support: Automatic handling of audit fields
 - Soft Deletion: Built-in soft deletion support
 - Result Pattern Integration: All operations return Result types
@@ -23,18 +23,21 @@ dotnet add package BMAP.Core.Data.Dapper
 
 ```csharp
 using BMAP.Core.Data.Dapper.Extensions;
-using BMAP.Core.Data.Dapper.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 // Configure services
 builder.Services.AddDapperDataServices();
 builder.Services.AddSqlServerConnection(connectionString);
 builder.Services.AddEntityHandlers<User>();
 
-// Define entity with attributes
+// Define entity with standard DataAnnotations
 [Table("Users")]
 public class User : IAuditableEntity
 {
-    [Column("Id", IsPrimaryKey = true, IsIdentity = true)]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("Id")]
     public int Id { get; set; }
     
     [Column("Name")]
@@ -66,6 +69,43 @@ public class User : IAuditableEntity
 }
 ```
 
+## Supported DataAnnotations
+
+### Table Mapping
+- `[Table("table_name")]` - Specifies the database table name
+
+### Column Mapping
+- `[Column("column_name")]` - Specifies the database column name
+- `[Key]` - Marks a property as the primary key
+- `[DatabaseGenerated(DatabaseGeneratedOption.Identity)]` - Marks a column as auto-increment
+- `[NotMapped]` - Excludes a property from database mapping
+
+### Example Entity
+
+```csharp
+[Table("Products")]
+public class Product : IAuditableEntity
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("product_id")]
+    public int Id { get; set; }
+    
+    [Column("product_name")]
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+    
+    [Column("price")]
+    public decimal Price { get; set; }
+    
+    [NotMapped]
+    public string DisplayName => $"{Name} - ${Price}";
+    
+    // IAuditableEntity properties...
+}
+```
+
 ## Usage
 
 ```csharp
@@ -76,6 +116,14 @@ var result = await mediator.SendAsync<Result<User>>(query);
 var createCommand = new CreateEntityCommand<User>(newUser);
 var createResult = await mediator.SendAsync<Result<int>>(createCommand);
 ```
+
+## Benefits of Using DataAnnotations
+
+- **Standard**: Uses the same annotations as Entity Framework and ASP.NET Core
+- **Validation**: Can be used with model validation in web applications  
+- **Familiar**: Developers already know these attributes
+- **Tooling**: Better IDE support and IntelliSense
+- **Interoperability**: Works seamlessly with other .NET components
 
 ## License
 
